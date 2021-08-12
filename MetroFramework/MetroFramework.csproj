@@ -15,7 +15,7 @@
 	<PackageLicenseExpression>MIT</PackageLicenseExpression>
 	<PackageProjectUrl>https://github.com/HowToDoThis/Xein.MetroFramework</PackageProjectUrl>
 	<RepositoryUrl>https://github.com/HowToDoThis/Xein.MetroFramework</RepositoryUrl>
-	<Version>1.5.0</Version>
+	<Version>1.5.1</Version>
 	<PackageTags>metroframework modernui modern ui metro metroui winforms</PackageTags>
 	<NeutralLanguage>en</NeutralLanguage>
 	<PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
@@ -39,10 +39,6 @@
     <EmbeddedResource Include="Fonts\Resources\Open_Sans.ttf" />
     <EmbeddedResource Include="Fonts\Resources\Open_Sans_Bold.ttf" />
     <EmbeddedResource Include="Fonts\Resources\Open_Sans_Light.ttf" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="System.Resources.Extensions" Version="5.0.0" />
   </ItemGroup>
 
 </Project>

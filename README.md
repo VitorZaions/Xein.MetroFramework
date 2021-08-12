@@ -1,17 +1,19 @@
-MetroFramework - WinForms on steroids.
+Xein.MetroFramework - WinForms on steroids.
 --------------------------------------
 
 Brings the new Modern UI alias Metro UI of Windows 8 to .NET Windows Forms applications. 
 
 Install via NuGet 
 ------------------
-    Install-Package MetroModernUI
+```
+Install-Package Xein.MetroFramework
+```
 
-[Updated to Version 1.4.0](http://denricdenise.info/2016/07/metroframework-modern-ui-version-1-4-0/)
-Link: https://www.nuget.org/packages/MetroModernUI/
+![Nuget](https://img.shields.io/nuget/v/Xein.MetroFramework?label=Xein.MetroFramework&style=for-the-badge)
 
 Documentation
 -------------------
+
 * [MetroFramework Modern UI Frequently Ask Questions](http://denricdenise.info/metroframework-faq/)
 
 * [MetroForm Properties](http://denricdenise.info/2015/07/metroframework-modern-ui-metroform-properties/)
@@ -21,15 +23,16 @@ Documentation
 
 Supported platforms
 -------------------
-* Windows XP SP1/SP2/SP3 (without Aero Glass)
-* Windows Vista
+
+Due to Net 5.0 Limitation, Dropped Windows Vista, Windows XP
+
 * Windows 7
 * Windows 8
 * Windows 10
 
 Requirements
 ------------
-* .NET Framework 2.0 and above.
+* .NET 5
 
 Controls supported
 ------------------
@@ -48,7 +51,7 @@ Controls supported
 * TabControl
 * TrackBar
 * Custom User Control
-* ContextMenu
+* ~~ContextMenu~~ (Removed Due Net5.0 not supported, but ContextMenuStrip still supported)
 * MessageBox
 * DateTimePicker
 * Grid
@@ -127,6 +130,8 @@ The MIT License (MIT)
 Copyright (c) 2011 Sven Walter, http://github.com/viperneo
 
 Copyright (c) 2013 Dennis Magno, http://github.com/dennismagno
+
+Copyright (c) 2021 Xein, https://github.com/HowToDoThis
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of 
 this software and associated documentation files (the "Software"), to deal in the 
