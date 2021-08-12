@@ -6,6 +6,19 @@
     <OutputType>Library</OutputType>
     <UseWindowsForms>true</UseWindowsForms>
 	<AssemblyOriginatorKeyFile>../MetroFramework.snk</AssemblyOriginatorKeyFile>
+	<GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+	<PackageId>Xein.MetroFramework</PackageId>
+	<Authors>NekoMeow</Authors>
+	<Product>Xein.MetroFramework</Product>
+	<Description>Brings the new Modern UI alias Metro UI of Windows 8 to .NET Windows Forms applications.</Description>
+	<Copyright>Copyright (c) 2021 Xein, https://github.com/HowToDoThis</Copyright>
+	<PackageLicenseExpression>MIT</PackageLicenseExpression>
+	<PackageProjectUrl>https://github.com/HowToDoThis/Xein.MetroFramework</PackageProjectUrl>
+	<RepositoryUrl>https://github.com/HowToDoThis/Xein.MetroFramework</RepositoryUrl>
+	<Version>1.5.0</Version>
+	<PackageTags>metroframework modernui modern ui metro metroui winforms</PackageTags>
+	<NeutralLanguage>en</NeutralLanguage>
+	<PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
@@ -15,6 +28,18 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="Fonts\Resources\Open_Sans.ttf" />
+    <None Remove="Fonts\Resources\Open_Sans_Bold.ttf" />
+    <None Remove="Fonts\Resources\Open_Sans_Light.ttf" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Fonts\Resources\Open_Sans.ttf" />
+    <EmbeddedResource Include="Fonts\Resources\Open_Sans_Bold.ttf" />
+    <EmbeddedResource Include="Fonts\Resources\Open_Sans_Light.ttf" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="System.Resources.Extensions" Version="5.0.0" />
