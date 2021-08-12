@@ -221,9 +221,7 @@ namespace MetroFramework.Controls
             {
                 if (kevent.KeyCode.Equals(Keys.Down) && !isSplitMenuVisible)
                 {
-                    ShowContextMenuStrip();
                 }
-
                 else if (kevent.KeyCode.Equals(Keys.Space) && kevent.Modifiers == Keys.None)
                 {
                     State = PushButtonState.Pressed;
@@ -246,7 +244,6 @@ namespace MetroFramework.Controls
             {
                 if (MouseButtons == MouseButtons.None && !isSplitMenuVisible)
                 {
-                    ShowContextMenuStrip();
                 }
             }
 
@@ -323,7 +320,6 @@ namespace MetroFramework.Controls
 
             if (dropDownRectangle.Contains(e.Location) && !isSplitMenuVisible && e.Button == MouseButtons.Left)
             {
-                ShowContextMenuStrip();
             }
             else
             {
@@ -342,7 +338,6 @@ namespace MetroFramework.Controls
             // if the right button was released inside the button
             if (mevent.Button == MouseButtons.Right && ClientRectangle.Contains(mevent.Location) && !isSplitMenuVisible)
             {
-                ShowContextMenuStrip();
             }
             else if (m_SplitMenuStrip == null || !isSplitMenuVisible)
             {
@@ -735,25 +730,7 @@ namespace MetroFramework.Controls
 
         #endregion
 
-        #region Helper Functions       
-
-        private void ShowContextMenuStrip()
-        {
-            if (skipNextOpen)
-            {
-                // we were called because we're closing the context menu strip
-                // when clicking the dropdown button.
-                skipNextOpen = false;
-                return;
-            }
-
-            State = PushButtonState.Pressed;
-
-            if (m_SplitMenuStrip != null)
-            {
-                m_SplitMenuStrip.Show(this, new Point(0, Height), ToolStripDropDownDirection.BelowRight);
-            }
-        }
+        #region Helper Functions
 
         private void SetButtonDrawState()
         {
