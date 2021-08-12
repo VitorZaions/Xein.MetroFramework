@@ -62,7 +62,6 @@ namespace MetroFramework.Controls
 
 
         ContextMenuStrip m_SplitMenuStrip;
-        ContextMenu m_SplitMenu;
 
         TextFormatFlags textFormatFlags = TextFormatFlags.Default;
         #endregion
@@ -86,31 +85,6 @@ namespace MetroFramework.Controls
             set
             {
                 SplitMenuStrip = value;
-            }
-        }
-
-        [DefaultValue(null)]
-        public ContextMenu SplitMenu
-        {
-            get { return m_SplitMenu; }
-            set
-            {
-                //remove the event handlers for the old SplitMenu
-                if (m_SplitMenu != null)
-                {
-                    m_SplitMenu.Popup -= SplitMenu_Popup;
-                }
-
-                //add the event handlers for the new SplitMenu
-                if (value != null)
-                {
-                    ShowSplit = true;
-                    value.Popup += SplitMenu_Popup;
-                }
-                else
-                    ShowSplit = false;
-
-                m_SplitMenu = value;
             }
         }
 
@@ -343,8 +317,8 @@ namespace MetroFramework.Controls
                 return;
             }
 
-            //handle ContextMenu re-clicking the drop-down region to close the menu
-            if (m_SplitMenu != null && e.Button == MouseButtons.Left && !isMouseEntered)
+            // handle ContextMenu re-clicking the drop-down region to close the menu
+            if (e.Button == MouseButtons.Left && !isMouseEntered)
                 skipNextOpen = true;
 
             if (dropDownRectangle.Contains(e.Location) && !isSplitMenuVisible && e.Button == MouseButtons.Left)
@@ -370,7 +344,7 @@ namespace MetroFramework.Controls
             {
                 ShowContextMenuStrip();
             }
-            else if (m_SplitMenuStrip == null && m_SplitMenu == null || !isSplitMenuVisible)
+            else if (m_SplitMenuStrip == null || !isSplitMenuVisible)
             {
                 SetButtonDrawState();
 
@@ -775,11 +749,7 @@ namespace MetroFramework.Controls
 
             State = PushButtonState.Pressed;
 
-            if (m_SplitMenu != null)
-            {
-                m_SplitMenu.Show(this, new Point(0, Height));
-            }
-            else if (m_SplitMenuStrip != null)
+            if (m_SplitMenuStrip != null)
             {
                 m_SplitMenuStrip.Show(this, new Point(0, Height), ToolStripDropDownDirection.BelowRight);
             }

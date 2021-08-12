@@ -21,15 +21,13 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE 
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+using MetroFramework.Components;
+using MetroFramework.Drawing;
+using MetroFramework.Interfaces;
+
 using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Text;
 using System.ComponentModel;
 using System.Windows.Forms;
-
-using MetroFramework.Components;
-using MetroFramework.Interfaces;
 
 namespace MetroFramework.Controls
 {
@@ -117,13 +115,44 @@ namespace MetroFramework.Controls
         private MetroTilePartContentType partContentType = MetroTilePartContentType.Text;
         [DefaultValue(MetroTilePartContentType.Text)]
         [Category(MetroDefaults.PropertyCategory.Behaviour)]
-        public MetroTilePartContentType ContentType 
+        public MetroTilePartContentType ContentType
         {
             get { return partContentType; }
             set { partContentType = value; }
         }
 
         private string partHtmlContent = "";
+
+        [Category(MetroDefaults.PropertyCategory.Appearance)]
+        public event EventHandler<MetroPaintEventArgs> CustomPaintBackground;
+        protected virtual void OnCustomPaintBackground(MetroPaintEventArgs e)
+        {
+            if (GetStyle(ControlStyles.UserPaint) && CustomPaintBackground != null)
+            {
+                CustomPaintBackground(this, e);
+            }
+        }
+
+        [Category(MetroDefaults.PropertyCategory.Appearance)]
+        public event EventHandler<MetroPaintEventArgs> CustomPaint;
+        protected virtual void OnCustomPaint(MetroPaintEventArgs e)
+        {
+            if (GetStyle(ControlStyles.UserPaint) && CustomPaint != null)
+            {
+                CustomPaint(this, e);
+            }
+        }
+
+        [Category(MetroDefaults.PropertyCategory.Appearance)]
+        public event EventHandler<MetroPaintEventArgs> CustomPaintForeground;
+        protected virtual void OnCustomPaintForeground(MetroPaintEventArgs e)
+        {
+            if (GetStyle(ControlStyles.UserPaint) && CustomPaintForeground != null)
+            {
+                CustomPaintForeground(this, e);
+            }
+        }
+
         [DefaultValue("")]
         [Category(MetroDefaults.PropertyCategory.Appearance)]
         public string HtmlContent
@@ -131,6 +160,11 @@ namespace MetroFramework.Controls
             get { return partHtmlContent; }
             set { partHtmlContent = value; }
         }
+
+        public bool UseCustomBackColor { get => false; set => value = false; }
+        public bool UseCustomForeColor { get => false; set => value = false; }
+        public bool UseStyleColors { get => false; set => value = false; }
+        public bool UseSelectable { get => false; set => value = false; }
 
         #endregion
 

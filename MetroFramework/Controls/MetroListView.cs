@@ -595,21 +595,16 @@ namespace MetroFramework.Controls
 
                 using (StringFormat sf = new StringFormat())
                 {
-                    TextFormatFlags flags = TextFormatFlags.Left;
-
                     switch (e.Header.TextAlign)
                     {
                         case HorizontalAlignment.Center:
                             sf.Alignment = StringAlignment.Center;
-                            flags = TextFormatFlags.HorizontalCenter;
                             break;
                         case HorizontalAlignment.Right:
                             sf.Alignment = StringAlignment.Far;
-                            flags = TextFormatFlags.Right;
                             break;
                         default:
                             sf.Alignment = StringAlignment.Near;
-                            flags = TextFormatFlags.Left;
                             break;
                     }
 
@@ -617,7 +612,6 @@ namespace MetroFramework.Controls
                     if (e.ColumnIndex > 0 && Double.TryParse(e.SubItem.Text, NumberStyles.Currency, NumberFormatInfo.CurrentInfo, out subItemValue))
                     {
                         sf.Alignment = StringAlignment.Far;
-                        flags = TextFormatFlags.Right;
                     }
 
 

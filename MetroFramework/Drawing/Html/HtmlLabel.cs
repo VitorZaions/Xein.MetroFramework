@@ -24,9 +24,6 @@
  * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF 
  * THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-using System;
-using System.Collections.Generic;
-using System.Text;
 using System.ComponentModel;
 
 namespace MetroFramework.Drawing.Html
@@ -34,9 +31,7 @@ namespace MetroFramework.Drawing.Html
     /// <summary>
     /// Provides HTML rendering on the text of the label
     /// </summary>
-    [CLSCompliant(false)]
-    public class HtmlLabel
-        : HtmlPanel
+    public class HtmlLabel : HtmlPanel
     {
         #region Fields
 
@@ -90,14 +85,14 @@ namespace MetroFramework.Drawing.Html
             //Create fragment container
             htmlContainer = new InitialContainer("<table border=0 cellspacing=5 cellpadding=0 style=\"" + font + "\"><tr><td>" + text + "</td></tr></table>");
             //_htmlContainer.SetBounds(new Rectangle(0, 0, 10, 10));
-            
+
         }
 
         public override void MeasureBounds()
         {
             base.MeasureBounds();
 
-            if(htmlContainer != null && AutoSize)
+            if (htmlContainer != null && AutoSize)
                 Size = System.Drawing.Size.Round(htmlContainer.MaximumSize);
         }
 

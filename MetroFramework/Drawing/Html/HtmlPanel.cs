@@ -35,9 +35,7 @@ using System.Drawing;
 
 namespace MetroFramework.Drawing.Html
 {
-    [CLSCompliant(false)]
-    public class HtmlPanel
-        : ScrollableControl
+    public class HtmlPanel : ScrollableControl
     {
         #region Fields
         protected InitialContainer htmlContainer;

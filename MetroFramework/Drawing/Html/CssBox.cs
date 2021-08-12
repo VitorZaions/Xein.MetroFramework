@@ -46,7 +46,6 @@ namespace MetroFramework.Drawing.Html
     /// To know more about boxes visit CSS spec:
     /// http://www.w3.org/TR/CSS21/box.html
     /// </remarks>
-    [CLSCompliant(false)]
     public class CssBox
     {
         #region Static
@@ -1924,7 +1923,7 @@ namespace MetroFramework.Drawing.Html
         #region Properties
 
         /// <summary>
-        /// Gets the ï¿½ box
+        /// Gets the ï¿?box
         /// </summary>
         public CssBox ListItemBox
         {
@@ -2931,7 +2930,7 @@ namespace MetroFramework.Drawing.Html
             {
                 b.OffsetTop(amount);
             }
-            //TODO: Aquï¿½ me quede: no se mueve bien todo (probar con las tablas rojas)
+            //TODO: Aquï¿?me quede: no se mueve bien todo (probar con las tablas rojas)
             Location = new PointF(Location.X, Location.Y + amount);
         }
 

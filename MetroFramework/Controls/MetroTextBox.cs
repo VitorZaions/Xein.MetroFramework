@@ -351,16 +351,6 @@ namespace MetroFramework.Controls
 
         #region Routing Fields
 
-        public override ContextMenu ContextMenu
-        {
-            get { return baseTextBox.ContextMenu; }
-            set
-            {
-                ContextMenu = value;
-                baseTextBox.ContextMenu = value;
-            }
-        }
-
         public override ContextMenuStrip ContextMenuStrip
         {
             get { return baseTextBox.ContextMenuStrip; }
@@ -537,11 +527,6 @@ namespace MetroFramework.Controls
         private void BaseTextBoxContextMenuStripChanged(object sender, EventArgs e)
         {
             base.OnContextMenuStripChanged(e);
-        }
-
-        private void BaseTextBoxContextMenuChanged(object sender, EventArgs e)
-        {
-            base.OnContextMenuChanged(e);
         }
 
         private void BaseTextBoxClientSizeChanged(object sender, EventArgs e)
@@ -831,7 +816,6 @@ namespace MetroFramework.Controls
             baseTextBox.ChangeUICues += BaseTextBoxChangeUiCues;
             baseTextBox.Click += BaseTextBoxClick;
             baseTextBox.ClientSizeChanged += BaseTextBoxClientSizeChanged;
-            baseTextBox.ContextMenuChanged += BaseTextBoxContextMenuChanged;
             baseTextBox.ContextMenuStripChanged += BaseTextBoxContextMenuStripChanged;
             baseTextBox.CursorChanged += BaseTextBoxCursorChanged;
 

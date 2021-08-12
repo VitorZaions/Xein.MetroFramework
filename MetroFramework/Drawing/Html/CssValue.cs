@@ -36,7 +36,6 @@ using System.Drawing;
 
 namespace MetroFramework.Drawing.Html
 {
-    [CLSCompliant(false)]
     public static class CssValue
     {
         /// <summary>

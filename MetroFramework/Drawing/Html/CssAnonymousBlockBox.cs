@@ -37,9 +37,7 @@ namespace MetroFramework.Drawing.Html
     /// To learn more about anonymous block boxes visit CSS spec:
     /// http://www.w3.org/TR/CSS21/visuren.html#anonymous-block-level
     /// </remarks>
-    [CLSCompliant(false)]
-    public class CssAnonymousBlockBox
-        : CssBox
+    public class CssAnonymousBlockBox : CssBox
     {
         public CssAnonymousBlockBox(CssBox parent)
             : base(parent)
@@ -64,9 +62,7 @@ namespace MetroFramework.Drawing.Html
     /// <summary>
     /// Represents an AnonymousBlockBox which contains only blank spaces
     /// </summary>
-    [CLSCompliant(false)]
-    public class CssAnonymousSpaceBlockBox
-        : CssAnonymousBlockBox
+    public class CssAnonymousSpaceBlockBox : CssAnonymousBlockBox
     {
         public CssAnonymousSpaceBlockBox(CssBox parent)
             : base(parent)

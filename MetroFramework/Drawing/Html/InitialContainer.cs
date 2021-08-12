@@ -32,9 +32,7 @@ using System.Drawing;
 
 namespace MetroFramework.Drawing.Html
 {
-    [CLSCompliant(false)]
-    public class InitialContainer
-        : CssBox
+    public class InitialContainer : CssBox
     {
         #region Fields
         private Dictionary<string, Dictionary<string, CssBlock>> _media_blocks;
