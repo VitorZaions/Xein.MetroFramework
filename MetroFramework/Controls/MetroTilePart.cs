@@ -54,21 +54,11 @@ namespace MetroFramework.Controls
         {
             get
             {
-                if (DesignMode || metroStyle != MetroColorStyle.Default)
-                {
-                    return metroStyle;
-                }
-
-                if (StyleManager != null && metroStyle == MetroColorStyle.Default)
-                {
-                    return StyleManager.Style;
-                }
-                if (StyleManager == null && metroStyle == MetroColorStyle.Default)
-                {
-                    return MetroDefaults.Style;
-                }
-
-                return metroStyle;
+                return DesignMode || metroStyle != MetroColorStyle.Default
+                    ? metroStyle
+                    : StyleManager != null && metroStyle == MetroColorStyle.Default
+                    ? StyleManager.Style
+                    : StyleManager == null && metroStyle == MetroColorStyle.Default ? MetroDefaults.Style : metroStyle;
             }
             set { metroStyle = value; }
         }
@@ -80,48 +70,26 @@ namespace MetroFramework.Controls
         {
             get
             {
-                if (DesignMode || metroTheme != MetroThemeStyle.Default)
-                {
-                    return metroTheme;
-                }
-
-                if (StyleManager != null && metroTheme == MetroThemeStyle.Default)
-                {
-                    return StyleManager.Theme;
-                }
-                if (StyleManager == null && metroTheme == MetroThemeStyle.Default)
-                {
-                    return MetroDefaults.Theme;
-                }
-
-                return metroTheme;
+                return DesignMode || metroTheme != MetroThemeStyle.Default
+                    ? metroTheme
+                    : StyleManager != null && metroTheme == MetroThemeStyle.Default
+                    ? StyleManager.Theme
+                    : StyleManager == null && metroTheme == MetroThemeStyle.Default ? MetroDefaults.Theme : metroTheme;
             }
             set { metroTheme = value; }
         }
 
-        private MetroStyleManager metroStyleManager = null;
         [Browsable(false)]
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public MetroStyleManager StyleManager
-        {
-            get { return metroStyleManager; }
-            set { metroStyleManager = value; }
-        }
+        public MetroStyleManager StyleManager { get; set; } = null;
 
         #endregion
 
         #region Fields
 
-        private MetroTilePartContentType partContentType = MetroTilePartContentType.Text;
         [DefaultValue(MetroTilePartContentType.Text)]
         [Category(MetroDefaults.PropertyCategory.Behaviour)]
-        public MetroTilePartContentType ContentType
-        {
-            get { return partContentType; }
-            set { partContentType = value; }
-        }
-
-        private string partHtmlContent = "";
+        public MetroTilePartContentType ContentType { get; set; } = MetroTilePartContentType.Text;
 
         [Category(MetroDefaults.PropertyCategory.Appearance)]
         public event EventHandler<MetroPaintEventArgs> CustomPaintBackground;
@@ -155,16 +123,12 @@ namespace MetroFramework.Controls
 
         [DefaultValue("")]
         [Category(MetroDefaults.PropertyCategory.Appearance)]
-        public string HtmlContent
-        {
-            get { return partHtmlContent; }
-            set { partHtmlContent = value; }
-        }
+        public string HtmlContent { get; set; } = "";
 
-        public bool UseCustomBackColor { get => false; set => value = false; }
-        public bool UseCustomForeColor { get => false; set => value = false; }
-        public bool UseStyleColors { get => false; set => value = false; }
-        public bool UseSelectable { get => false; set => value = false; }
+        public bool UseCustomBackColor { get => false; set => _ = false; }
+        public bool UseCustomForeColor { get => false; set => _ = false; }
+        public bool UseStyleColors { get => false; set => _ = false; }
+        public bool UseSelectable { get => false; set => _ = false; }
 
         #endregion
 
@@ -184,9 +148,9 @@ namespace MetroFramework.Controls
         {
             base.OnPaint(e);
 
-            if (partContentType == MetroTilePartContentType.Html)
+            if (ContentType == MetroTilePartContentType.Html)
             {
-                MetroFramework.Drawing.Html.HtmlRenderer.Render(e.Graphics, partHtmlContent, ClientRectangle, true);
+                MetroFramework.Drawing.Html.HtmlRenderer.Render(e.Graphics, HtmlContent, ClientRectangle, true);
             }
         }
 

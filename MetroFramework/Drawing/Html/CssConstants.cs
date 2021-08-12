@@ -24,9 +24,6 @@
  * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF 
  * THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace MetroFramework.Drawing.Html
 {
@@ -103,7 +100,7 @@ namespace MetroFramework.Drawing.Html
         public const string XSmall = "x-small";
         public const string XXLarge = "xx-large";
         public const string XXSmall = "xx-small";
-        
+
 
         #region Units
         /// <summary>

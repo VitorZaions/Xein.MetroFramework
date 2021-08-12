@@ -21,17 +21,16 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE 
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+using MetroFramework.Components;
+using MetroFramework.Drawing;
+using MetroFramework.Interfaces;
+using MetroFramework.Native;
+
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
 using System.Security;
 using System.Windows.Forms;
-
-using MetroFramework.Interfaces;
-using MetroFramework.Drawing;
-using MetroFramework.Components;
-using MetroFramework.Native;
 
 namespace MetroFramework.Controls
 {
@@ -78,21 +77,11 @@ namespace MetroFramework.Controls
         {
             get
             {
-                if (DesignMode || metroStyle != MetroColorStyle.Default)
-                {
-                    return metroStyle;
-                }
-
-                if (StyleManager != null && metroStyle == MetroColorStyle.Default)
-                {
-                    return StyleManager.Style;
-                }
-                if (StyleManager == null && metroStyle == MetroColorStyle.Default)
-                {
-                    return MetroDefaults.Style;
-                }
-
-                return metroStyle;
+                return DesignMode || metroStyle != MetroColorStyle.Default
+                    ? metroStyle
+                    : StyleManager != null && metroStyle == MetroColorStyle.Default
+                    ? StyleManager.Style
+                    : StyleManager == null && metroStyle == MetroColorStyle.Default ? MetroDefaults.Style : metroStyle;
             }
             set { metroStyle = value; }
         }
@@ -104,60 +93,30 @@ namespace MetroFramework.Controls
         {
             get
             {
-                if (DesignMode || metroTheme != MetroThemeStyle.Default)
-                {
-                    return metroTheme;
-                }
-
-                if (StyleManager != null && metroTheme == MetroThemeStyle.Default)
-                {
-                    return StyleManager.Theme;
-                }
-                if (StyleManager == null && metroTheme == MetroThemeStyle.Default)
-                {
-                    return MetroDefaults.Theme;
-                }
-
-                return metroTheme;
+                return DesignMode || metroTheme != MetroThemeStyle.Default
+                    ? metroTheme
+                    : StyleManager != null && metroTheme == MetroThemeStyle.Default
+                    ? StyleManager.Theme
+                    : StyleManager == null && metroTheme == MetroThemeStyle.Default ? MetroDefaults.Theme : metroTheme;
             }
             set { metroTheme = value; }
         }
 
-        private MetroStyleManager metroStyleManager = null;
         [Browsable(false)]
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public MetroStyleManager StyleManager
-        {
-            get { return metroStyleManager; }
-            set { metroStyleManager = value; }
-        }
+        public MetroStyleManager StyleManager { get; set; } = null;
 
-        private bool useCustomBackColor = false;
         [DefaultValue(false)]
         [Category(MetroDefaults.PropertyCategory.Appearance)]
-        public bool UseCustomBackColor
-        {
-            get { return useCustomBackColor; }
-            set { useCustomBackColor = value; }
-        }
+        public bool UseCustomBackColor { get; set; } = false;
 
-        private bool useCustomForeColor = false;
         [DefaultValue(false)]
         [Category(MetroDefaults.PropertyCategory.Appearance)]
-        public bool UseCustomForeColor
-        {
-            get { return useCustomForeColor; }
-            set { useCustomForeColor = value; }
-        }
+        public bool UseCustomForeColor { get; set; } = false;
 
-        private bool useStyleColors = false;
         [DefaultValue(false)]
         [Category(MetroDefaults.PropertyCategory.Appearance)]
-        public bool UseStyleColors
-        {
-            get { return useStyleColors; }
-            set { useStyleColors = value; }
-        }
+        public bool UseStyleColors { get; set; } = false;
 
         [Browsable(false)]
         [Category(MetroDefaults.PropertyCategory.Behaviour)]
@@ -172,17 +131,12 @@ namespace MetroFramework.Controls
 
         #region Fields
 
-        private MetroScrollBar verticalScrollbar = new MetroScrollBar(MetroScrollOrientation.Vertical);
-        private MetroScrollBar horizontalScrollbar = new MetroScrollBar(MetroScrollOrientation.Horizontal);
+        private readonly MetroScrollBar verticalScrollbar = new(MetroScrollOrientation.Vertical);
+        private readonly MetroScrollBar horizontalScrollbar = new(MetroScrollOrientation.Horizontal);
 
-        private bool showHorizontalScrollbar = false;
         [DefaultValue(false)]
         [Category(MetroDefaults.PropertyCategory.Appearance)]
-        public bool HorizontalScrollbar 
-        {
-            get { return showHorizontalScrollbar; }
-            set { showHorizontalScrollbar = value; }
-        }
+        public bool HorizontalScrollbar { get; set; } = false;
 
         [Category(MetroDefaults.PropertyCategory.Appearance)]
         public int HorizontalScrollbarSize
@@ -205,14 +159,9 @@ namespace MetroFramework.Controls
             set { horizontalScrollbar.HighlightOnWheel = value; }
         }
 
-        private bool showVerticalScrollbar = false;
         [DefaultValue(false)]
         [Category(MetroDefaults.PropertyCategory.Appearance)]
-        public bool VerticalScrollbar
-        {
-            get { return showVerticalScrollbar; }
-            set { showVerticalScrollbar = value; }
-        }
+        public bool VerticalScrollbar { get; set; } = false;
 
         [Category(MetroDefaults.PropertyCategory.Appearance)]
         public int VerticalScrollbarSize
@@ -246,8 +195,8 @@ namespace MetroFramework.Controls
             {
                 if (value)
                 {
-                    showHorizontalScrollbar = true;
-                    showVerticalScrollbar = true;
+                    HorizontalScrollbar = true;
+                    VerticalScrollbar = true;
                 }
 
                 base.AutoScroll = value;
@@ -302,7 +251,7 @@ namespace MetroFramework.Controls
             {
                 Color backColor = BackColor;
 
-                if (!useCustomBackColor)
+                if (!UseCustomBackColor)
                 {
                     backColor = MetroPaint.BackColor.Form(Theme);
                 }
@@ -356,7 +305,7 @@ namespace MetroFramework.Controls
 
             if (HorizontalScrollbar)
             {
-                horizontalScrollbar.Visible = HorizontalScroll.Visible;                
+                horizontalScrollbar.Visible = HorizontalScroll.Visible;
             }
             if (HorizontalScroll.Visible)
             {
@@ -368,7 +317,7 @@ namespace MetroFramework.Controls
 
             if (VerticalScrollbar)
             {
-                verticalScrollbar.Visible = VerticalScroll.Visible;                
+                verticalScrollbar.Visible = VerticalScroll.Visible;
             }
             if (VerticalScroll.Visible)
             {

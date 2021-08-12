@@ -27,6 +27,9 @@
 // http://dotnetrix.co.uk/tabcontrol.htm
 // http://www.pcreview.co.uk/forums/adding-custom-tabpages-design-time-t2904262.html
 
+using MetroFramework.Controls;
+using MetroFramework.Native;
+
 using System;
 using System.Collections;
 using System.ComponentModel;
@@ -34,16 +37,13 @@ using System.ComponentModel.Design;
 using System.Windows.Forms;
 using System.Windows.Forms.Design;
 
-using MetroFramework.Controls;
-using MetroFramework.Native;
-
 namespace MetroFramework.Design.Controls
 {
     internal class MetroTabControlDesigner : ParentControlDesigner
     {
         #region Fields
 
-        private readonly DesignerVerbCollection designerVerbs = new DesignerVerbCollection();
+        private readonly DesignerVerbCollection designerVerbs = new();
 
         private IDesignerHost designerHost;
 
@@ -73,7 +73,7 @@ namespace MetroFramework.Design.Controls
         {
             get
             {
-                return designerHost ?? (designerHost = (IDesignerHost)(GetService(typeof(IDesignerHost))));
+                return designerHost ??= (IDesignerHost)GetService(typeof(IDesignerHost));
             }
         }
 
@@ -81,7 +81,7 @@ namespace MetroFramework.Design.Controls
         {
             get
             {
-                return selectionService ?? (selectionService = (ISelectionService)(GetService(typeof(ISelectionService))));
+                return selectionService ??= (ISelectionService)GetService(typeof(ISelectionService));
             }
         }
 
@@ -99,15 +99,15 @@ namespace MetroFramework.Design.Controls
         #endregion
 
         #region Private Methods
-        
+
         private void OnAddPage(Object sender, EventArgs e)
         {
-            var parentControl = (MetroTabControl) Control;
+            var parentControl = (MetroTabControl)Control;
             var oldTabs = parentControl.Controls;
 
             RaiseComponentChanging(TypeDescriptor.GetProperties(parentControl)["TabPages"]);
 
-            var p = (MetroTabPage)(DesignerHost.CreateComponent(typeof(MetroTabPage)));
+            var p = (MetroTabPage)DesignerHost.CreateComponent(typeof(MetroTabPage));
             p.Text = p.Name;
             parentControl.TabPages.Add(p);
 
@@ -120,7 +120,7 @@ namespace MetroFramework.Design.Controls
 
         private void OnRemovePage(Object sender, EventArgs e)
         {
-            var parentControl = (MetroTabControl) Control;
+            var parentControl = (MetroTabControl)Control;
             var oldTabs = parentControl.Controls;
 
             if (parentControl.SelectedIndex < 0)
@@ -145,17 +145,13 @@ namespace MetroFramework.Design.Controls
 
         private void SetVerbs()
         {
-            var parentControl = (MetroTabControl) Control;
+            var parentControl = (MetroTabControl)Control;
 
-            switch (parentControl.TabPages.Count)
+            Verbs[1].Enabled = parentControl.TabPages.Count switch
             {
-                case 0:
-                    Verbs[1].Enabled = false;
-                    break;
-                default:
-                    Verbs[1].Enabled = true;
-                    break;
-            }
+                0 => false,
+                _ => true,
+            };
         }
 
         #endregion
@@ -170,7 +166,7 @@ namespace MetroFramework.Design.Controls
                 case (int)WinApi.Messages.WM_NCHITTEST:
                     if (m.Result.ToInt32() == (int)WinApi.HitTest.HTTRANSPARENT)
                     {
-                        m.Result = (IntPtr) WinApi.HitTest.HTCLIENT;
+                        m.Result = (IntPtr)WinApi.HitTest.HTCLIENT;
                     }
                     break;
             }
@@ -180,7 +176,7 @@ namespace MetroFramework.Design.Controls
         {
             if (SelectionService.PrimarySelection == Control)
             {
-                var hti = new MetroFramework.Native.WinApi.TCHITTESTINFO
+                var hti = new WinApi.TCHITTESTINFO
                 {
                     pt = Control.PointToClient(point),
                     flags = 0

@@ -24,11 +24,8 @@
  * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF 
  * THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Drawing.Drawing2D;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 
 namespace MetroFramework.Drawing.Html
 {
@@ -81,9 +78,9 @@ namespace MetroFramework.Drawing.Html
         public static GraphicsPath GetBorderPath(Border border, CssBox b, RectangleF r, bool isLineStart, bool isLineEnd)
         {
             PointF[] pts = new PointF[4];
-            float bwidth = 0;
             GraphicsPath corner = null;
 
+            float bwidth;
             switch (border)
             {
                 case Border.Top:
@@ -97,7 +94,7 @@ namespace MetroFramework.Drawing.Html
                     if (isLineStart && b.ActualCornerNW == 0f) pts[3].X += b.ActualBorderLeftWidth;
 
                     if (b.ActualCornerNW > 0f) corner = CreateCorner(b, r, 1);
-                    
+
                     break;
                 case Border.Right:
                     bwidth = b.ActualBorderRightWidth;
@@ -105,10 +102,10 @@ namespace MetroFramework.Drawing.Html
                     pts[1] = RoundP(new PointF(r.Right, r.Top + b.ActualCornerNE), b);
                     pts[2] = RoundP(new PointF(r.Right, r.Bottom - b.ActualCornerSE), b);
                     pts[3] = RoundP(new PointF(r.Right - bwidth, r.Bottom - b.ActualCornerSE), b);
-                    
-                   
+
+
                     if (b.ActualCornerNE == 0f) pts[0].Y += b.ActualBorderTopWidth;
-                    if (b.ActualCornerSE == 0f) pts[3].Y -= b.ActualBorderBottomWidth; 
+                    if (b.ActualCornerSE == 0f) pts[3].Y -= b.ActualBorderBottomWidth;
                     if (b.ActualCornerNE > 0f) corner = CreateCorner(b, r, 2);
                     break;
                 case Border.Bottom:
@@ -137,7 +134,7 @@ namespace MetroFramework.Drawing.Html
                     break;
             }
 
-            GraphicsPath path = new GraphicsPath(pts, new byte[] { (byte)PathPointType.Line, (byte)PathPointType.Line, (byte)PathPointType.Line, (byte)PathPointType.Line });
+            GraphicsPath path = new(pts, new byte[] { (byte)PathPointType.Line, (byte)PathPointType.Line, (byte)PathPointType.Line, (byte)PathPointType.Line });
 
             if (corner != null)
             {
@@ -157,7 +154,7 @@ namespace MetroFramework.Drawing.Html
         /// <returns></returns>
         private static GraphicsPath CreateCorner(CssBox b, RectangleF r, int cornerIndex)
         {
-            GraphicsPath corner = new GraphicsPath();
+            GraphicsPath corner = new();
 
             RectangleF outer = RectangleF.Empty;
             RectangleF inner = RectangleF.Empty;
@@ -192,7 +189,7 @@ namespace MetroFramework.Drawing.Html
                     break;
                 case 4:
                     outer = new RectangleF(r.Left, r.Bottom - b.ActualCornerSW, b.ActualCornerSW, b.ActualCornerSW);
-                    inner = RectangleF.FromLTRB( r.Left + b.ActualBorderLeftWidth , outer.Top , outer.Right, outer.Bottom - b.ActualBorderBottomWidth);
+                    inner = RectangleF.FromLTRB(r.Left + b.ActualBorderLeftWidth, outer.Top, outer.Right, outer.Bottom - b.ActualBorderBottomWidth);
                     start1 = 90;
                     start2 = 180;
                     outer.Y -= outer.Height;
@@ -235,7 +232,7 @@ namespace MetroFramework.Drawing.Html
             ///  |       |
             ///  SW-----SE
 
-            GraphicsPath path = new GraphicsPath();
+            GraphicsPath path = new();
 
             nwRadius *= 2;
             neRadius *= 2;
@@ -244,7 +241,7 @@ namespace MetroFramework.Drawing.Html
 
             //NW ---- NE
             path.AddLine(rect.X + nwRadius, rect.Y, rect.Right - neRadius, rect.Y);
-            
+
             //NE Arc
             if (neRadius > 0f)
             {

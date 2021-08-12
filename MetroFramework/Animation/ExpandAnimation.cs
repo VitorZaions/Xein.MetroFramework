@@ -31,16 +31,16 @@ namespace MetroFramework.Animation
         public void Start(Control control, Size targetSize, TransitionType transitionType, int duration)
         {
             base.Start(control, transitionType, duration,
-                delegate 
+                delegate
                 {
                     int width = DoExpandAnimation(control.Width, targetSize.Width);
                     int height = DoExpandAnimation(control.Height, targetSize.Height);
 
                     control.Size = new Size(width, height);
-                }, 
-                delegate 
+                },
+                delegate
                 {
-                    return (control.Size.Equals(targetSize));
+                    return control.Size.Equals(targetSize);
                 });
         }
 

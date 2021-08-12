@@ -1,24 +1,129 @@
-﻿using System;
-using System.Drawing;
-using System.ComponentModel;
-using System.Windows.Forms;
-
-using MetroFramework.Components;
+﻿using MetroFramework.Components;
 using MetroFramework.Drawing;
 using MetroFramework.Interfaces;
-using System.Drawing.Imaging;
+
+using System;
 using System.Collections;
-using System.Reflection;
+using System.ComponentModel;
+using System.Drawing;
 using System.Globalization;
 using System.Runtime.InteropServices;
+using System.Windows.Forms;
 
 namespace MetroFramework.Controls
 {
+    public class ListViewColumnSorter : IComparer
+    {
+        public enum SortModifiers
+        {
+            SortByImage,
+            SortByCheckbox,
+            SortByText
+        }
+
+        /// <summary>
+        /// Specifies the column to be sorted
+        /// </summary>
+        public int ColumnToSort;
+
+        /// <summary>
+        /// Specifies the order in which to sort (i.e. 'Ascending').
+        /// </summary>
+        public SortOrder OrderOfSort;
+
+        /// <summary>
+        /// Case insensitive comparer object
+        /// </summary>
+        private readonly CaseInsensitiveComparer ObjectCompare;
+
+        public SortModifiers SortModifier { set; get; } = SortModifiers.SortByText;
+
+        /// <summary>
+        /// Class constructor.  Initializes various elements
+        /// </summary>
+        public ListViewColumnSorter()
+        {
+            // Initialize the column to '0'
+            ColumnToSort = 0;
+
+            // Initialize the CaseInsensitiveComparer object
+            ObjectCompare = new CaseInsensitiveComparer();
+        }
+
+        /// <summary>
+        /// This method is inherited from the IComparer interface.  It compares the two objects passed using a case insensitive comparison.
+        /// </summary>
+        /// <param name="x">First object to be compared</param>
+        /// <param name="y">Second object to be compared</param>
+        /// <returns>The result of the comparison. "0" if equal, negative if 'x' is less than 'y' and positive if 'x' is greater than 'y'</returns>
+        public int Compare(object x, object y)
+        {
+            ListViewItem listviewX, listviewY;
+
+            // Cast the objects to be compared to ListViewItem objects
+            listviewX = (ListViewItem)x;
+            listviewY = (ListViewItem)y;
+
+
+            int compareResult = DateTime.TryParse(listviewX.SubItems[ColumnToSort].Text, out DateTime dateX) &&
+        DateTime.TryParse(listviewY.SubItems[ColumnToSort].Text, out DateTime dateY)
+        ? ObjectCompare.Compare(dateX, dateY)
+        : ObjectCompare.Compare(listviewX.SubItems[ColumnToSort].Text, listviewY.SubItems[ColumnToSort].Text);
+
+            // Calculate correct return value based on object comparison
+            if (OrderOfSort == SortOrder.Ascending)
+            {
+                // Ascending sort is selected, return normal result of compare operation
+                return compareResult;
+            }
+            else if (OrderOfSort == SortOrder.Descending)
+            {
+                // Descending sort is selected, return negative result of compare operation
+                return -compareResult;
+            }
+            else
+            {
+                // Return '0' to indicate they are equal
+                return 0;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the number of the column to which to apply the sorting operation (Defaults to '0').
+        /// </summary>
+        public int SortColumn
+        {
+            set
+            {
+                ColumnToSort = value;
+            }
+            get
+            {
+                return ColumnToSort;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the order of sorting to apply (for example, 'Ascending' or 'Descending').
+        /// </summary>
+        public SortOrder Order
+        {
+            set
+            {
+                OrderOfSort = value;
+            }
+            get
+            {
+                return OrderOfSort;
+            }
+        }
+    }
+
     public partial class MetroListView : ListView, IMetroControl
     {
         private ListViewColumnSorter lvwColumnSorter;
-        private Font stdFont = new Font("Segoe UI", 11f, FontStyle.Regular, GraphicsUnit.Pixel);
-        float _offset = 0.2F;
+        private readonly Font stdFont = new("Segoe UI", 11f, FontStyle.Regular, GraphicsUnit.Pixel);
+        readonly float _offset = 0.2F;
 
         #region Interface
 
@@ -59,21 +164,11 @@ namespace MetroFramework.Controls
         {
             get
             {
-                if (DesignMode || metroStyle != MetroColorStyle.Default)
-                {
-                    return metroStyle;
-                }
-
-                if (StyleManager != null && metroStyle == MetroColorStyle.Default)
-                {
-                    return StyleManager.Style;
-                }
-                if (StyleManager == null && metroStyle == MetroColorStyle.Default)
-                {
-                    return MetroDefaults.Style;
-                }
-
-                return metroStyle;
+                return DesignMode || metroStyle != MetroColorStyle.Default
+                    ? metroStyle
+                    : StyleManager != null && metroStyle == MetroColorStyle.Default
+                    ? StyleManager.Style
+                    : StyleManager == null && metroStyle == MetroColorStyle.Default ? MetroDefaults.Style : metroStyle;
             }
             set
             {
@@ -88,63 +183,30 @@ namespace MetroFramework.Controls
         {
             get
             {
-                if (DesignMode || metroTheme != MetroThemeStyle.Default)
-                {
-                    return metroTheme;
-                }
-
-                if (StyleManager != null && metroTheme == MetroThemeStyle.Default)
-                {
-                    return StyleManager.Theme;
-                }
-                if (StyleManager == null && metroTheme == MetroThemeStyle.Default)
-                {
-                    return MetroDefaults.Theme;
-                }
-
-                return metroTheme;
+                return DesignMode || metroTheme != MetroThemeStyle.Default
+                    ? metroTheme
+                    : StyleManager != null && metroTheme == MetroThemeStyle.Default
+                    ? StyleManager.Theme
+                    : StyleManager == null && metroTheme == MetroThemeStyle.Default ? MetroDefaults.Theme : metroTheme;
             }
             set { metroTheme = value; }
         }
 
-        private MetroStyleManager metroStyleManager = null;
         [Browsable(false)]
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public MetroStyleManager StyleManager
-        {
-            get { return metroStyleManager; }
-            set
-            {
-                metroStyleManager = value;
-            }
-        }
+        public MetroStyleManager StyleManager { get; set; } = null;
 
-        private bool useCustomBackColor = false;
         [DefaultValue(false)]
         [Category(MetroDefaults.PropertyCategory.Appearance)]
-        public bool UseCustomBackColor
-        {
-            get { return useCustomBackColor; }
-            set { useCustomBackColor = value; }
-        }
+        public bool UseCustomBackColor { get; set; } = false;
 
-        private bool useCustomForeColor = false;
         [DefaultValue(false)]
         [Category(MetroDefaults.PropertyCategory.Appearance)]
-        public bool UseCustomForeColor
-        {
-            get { return useCustomForeColor; }
-            set { useCustomForeColor = value; }
-        }
+        public bool UseCustomForeColor { get; set; } = false;
 
-        private bool useStyleColors = false;
         [DefaultValue(false)]
         [Category(MetroDefaults.PropertyCategory.Appearance)]
-        public bool UseStyleColors
-        {
-            get { return useStyleColors; }
-            set { useStyleColors = value; }
-        }
+        public bool UseStyleColors { get; set; } = false;
 
         [Browsable(false)]
         [Category(MetroDefaults.PropertyCategory.Behaviour)]
@@ -204,11 +266,11 @@ namespace MetroFramework.Controls
             SIF_POS = 0x0004,
             SIF_DISABLENOSCROLL = 0x0008,
             SIF_TRACKPOS = 0x0010,
-            SIF_ALL = (SIF_RANGE | SIF_PAGE | SIF_POS | SIF_TRACKPOS)
+            SIF_ALL = SIF_RANGE | SIF_PAGE | SIF_POS | SIF_TRACKPOS
         }
 
         //ListView item information
-        [StructLayoutAttribute(LayoutKind.Sequential)]
+        [StructLayout(LayoutKind.Sequential)]
         private struct LVITEM
         {
             public uint mask;
@@ -245,10 +307,10 @@ namespace MetroFramework.Controls
         private const UInt32 WM_NCCALCSIZE = 0x83;
 
         private const UInt32 LVM_FIRST = 0x1000;
-        private const UInt32 LVM_INSERTITEMA = (LVM_FIRST + 7);
-        private const UInt32 LVM_INSERTITEMW = (LVM_FIRST + 77);
-        private const UInt32 LVM_DELETEITEM = (LVM_FIRST + 8);
-        private const UInt32 LVM_DELETEALLITEMS = (LVM_FIRST + 9);
+        private const UInt32 LVM_INSERTITEMA = LVM_FIRST + 7;
+        private const UInt32 LVM_INSERTITEMW = LVM_FIRST + 77;
+        private const UInt32 LVM_DELETEITEM = LVM_FIRST + 8;
+        private const UInt32 LVM_DELETEALLITEMS = LVM_FIRST + 9;
 
         [DllImport("user32.dll")]
         [return: MarshalAs(UnmanagedType.Bool)]
@@ -262,7 +324,7 @@ namespace MetroFramework.Controls
 
         private int _disableChangeEvents = 0;
 
-        private MetroScrollBar _vScrollbar = new MetroScrollBar();
+        private readonly MetroScrollBar _vScrollbar = new();
 
         private void BeginDisableChangeEvents()
         {
@@ -275,7 +337,7 @@ namespace MetroFramework.Controls
                 _disableChangeEvents--;
         }
 
-        void _vScrollbar_ValueChanged(object sender, int newValue)
+        void VScrollbar_ValueChanged(object sender, int newValue)
         {
             if (_disableChangeEvents > 0)
                 return;
@@ -285,10 +347,10 @@ namespace MetroFramework.Controls
 
         public void GetScrollPosition(out int min, out int max, out int pos, out int smallchange, out int largechange)
         {
-            SCROLLINFO scrollinfo = new SCROLLINFO();
+            SCROLLINFO scrollinfo = new();
             scrollinfo.cbSize = (uint)Marshal.SizeOf(typeof(SCROLLINFO));
             scrollinfo.fMask = (int)ScrollInfoMask.SIF_ALL;
-            if (GetScrollInfo(this.Handle, (int)SBTYPES.SB_VERT, ref scrollinfo))
+            if (GetScrollInfo(Handle, (int)SBTYPES.SB_VERT, ref scrollinfo))
             {
                 min = scrollinfo.nMin;
                 max = scrollinfo.nMax;
@@ -311,8 +373,7 @@ namespace MetroFramework.Controls
         {
             if (_vScrollbar != null)
             {
-                int max, min, pos, smallchange, largechange;
-                GetScrollPosition(out min, out max, out pos, out smallchange, out largechange);
+                GetScrollPosition(out int min, out int max, out int pos, out int smallchange, out int largechange);
 
                 BeginDisableChangeEvents();
                 _vScrollbar.Value = pos == 1 ? 0 : pos;
@@ -327,7 +388,7 @@ namespace MetroFramework.Controls
 
         public void SetScrollPosition(int pos)
         {
-            pos = Math.Min(Items.Count -1, pos);
+            pos = Math.Min(Items.Count - 1, pos);
 
             if (pos < 0 || pos >= Items.Count)
                 return;
@@ -335,7 +396,7 @@ namespace MetroFramework.Controls
             SuspendLayout();
             EnsureVisible(pos);
 
-            if (View == System.Windows.Forms.View.Tile || View == System.Windows.Forms.View.LargeIcon || View == System.Windows.Forms.View.SmallIcon) return;
+            if (View is System.Windows.Forms.View.Tile or System.Windows.Forms.View.LargeIcon or System.Windows.Forms.View.SmallIcon) return;
             for (int i = 0; i < 10; i++)
             {
                 if (TopItem != null && TopItem.Index != pos)
@@ -352,8 +413,7 @@ namespace MetroFramework.Controls
 
             UpdateScrollbar();
 
-            if (ItemAdded != null)
-                ItemAdded(this);
+            ItemAdded?.Invoke(this);
         }
 
         protected void OnItemsRemoved()
@@ -362,8 +422,7 @@ namespace MetroFramework.Controls
 
             UpdateScrollbar();
 
-            if (ItemsRemoved != null)
-                ItemsRemoved(this);
+            ItemsRemoved?.Invoke(this);
         }
 
         protected override void OnMouseWheel(MouseEventArgs e)
@@ -378,25 +437,23 @@ namespace MetroFramework.Controls
         {
             if (m.Msg == WM_VSCROLL)
             {
-                int max, min, pos, smallchange, largechange;
-                GetScrollPosition(out min, out max, out pos, out smallchange, out largechange);
+                GetScrollPosition(out int min, out int max, out int pos, out int smallchange, out int largechange);
 
-                if (ScrollPositionChanged != null)
-                    ScrollPositionChanged(this, pos);
+                ScrollPositionChanged?.Invoke(this, pos);
 
                 if (_vScrollbar != null)
                     _vScrollbar.Value = pos;
             }
             else if (m.Msg == WM_NCCALCSIZE) // WM_NCCALCSIZE
             {
-                int style = (int)GetWindowLong(this.Handle, GWL_STYLE);
+                int style = (int)GetWindowLong(Handle, GWL_STYLE);
                 if ((style & WS_VSCROLL) == WS_VSCROLL)
-                    SetWindowLong(this.Handle, GWL_STYLE, style & ~WS_VSCROLL);
+                    SetWindowLong(Handle, GWL_STYLE, style & ~WS_VSCROLL);
             }
 
-            else if (m.Msg == LVM_INSERTITEMA || m.Msg == LVM_INSERTITEMW)
+            else if (m.Msg is (int)LVM_INSERTITEMA or (int)LVM_INSERTITEMW)
                 OnItemAdded();
-            else if (m.Msg == LVM_DELETEITEM || m.Msg == LVM_DELETEALLITEMS)
+            else if (m.Msg is (int)LVM_DELETEITEM or (int)LVM_DELETEALLITEMS)
                 OnItemsRemoved();
 
             base.WndProc(ref m);
@@ -409,18 +466,12 @@ namespace MetroFramework.Controls
 
         public static int GetWindowLong(IntPtr hWnd, int nIndex)
         {
-            if (IntPtr.Size == 4)
-                return (int)GetWindowLong32(hWnd, nIndex);
-            else
-                return (int)(long)GetWindowLongPtr64(hWnd, nIndex);
+            return IntPtr.Size == 4 ? (int)GetWindowLong32(hWnd, nIndex) : (int)(long)GetWindowLongPtr64(hWnd, nIndex);
         }
 
         public static int SetWindowLong(IntPtr hWnd, int nIndex, int dwNewLong)
         {
-            if (IntPtr.Size == 4)
-                return (int)SetWindowLongPtr32(hWnd, nIndex, dwNewLong);
-            else
-                return (int)(long)SetWindowLongPtr64(hWnd, nIndex, dwNewLong);
+            return IntPtr.Size == 4 ? (int)SetWindowLongPtr32(hWnd, nIndex, dwNewLong) : (int)(long)SetWindowLongPtr64(hWnd, nIndex, dwNewLong);
         }
 
         [DllImport("user32.dll", EntryPoint = "GetWindowLong", CharSet = CharSet.Auto)]
@@ -438,22 +489,22 @@ namespace MetroFramework.Controls
 
         public MetroListView()
         {
-            this.Font = new Font("Segoe UI", 12.0f);
-            this.HideSelection = true;
+            Font = new Font("Segoe UI", 12.0f);
+            HideSelection = true;
 
-            this.OwnerDraw = true;
-            this.DrawColumnHeader += MetroListView_DrawColumnHeader;
-            this.DrawItem += MetroListView_DrawItem;
-            this.DrawSubItem += MetroListView_DrawSubItem;
-            this.Resize += MetroListView_Resize;
-            this.ColumnClick += MetroListView_ColumnClick;
-            this.SelectedIndexChanged += MetroListView_SelectedIndexChanged;
-            this.FullRowSelect = true;
-            this.Controls.Add(_vScrollbar);
+            OwnerDraw = true;
+            DrawColumnHeader += MetroListView_DrawColumnHeader;
+            DrawItem += MetroListView_DrawItem;
+            DrawSubItem += MetroListView_DrawSubItem;
+            Resize += MetroListView_Resize;
+            ColumnClick += MetroListView_ColumnClick;
+            SelectedIndexChanged += MetroListView_SelectedIndexChanged;
+            FullRowSelect = true;
+            Controls.Add(_vScrollbar);
             _vScrollbar.Visible = false;
             _vScrollbar.Width = 15;
             _vScrollbar.Dock = DockStyle.Right;
-            _vScrollbar.ValueChanged += _vScrollbar_ValueChanged;
+            _vScrollbar.ValueChanged += VScrollbar_ValueChanged;
 
             //this.DoubleBuffering(true);
         }
@@ -479,12 +530,12 @@ namespace MetroFramework.Controls
                 if (!value)
                 {
                     lvwColumnSorter = null;
-                    this.ListViewItemSorter = null;
+                    ListViewItemSorter = null;
                 }
                 else
                 {
                     lvwColumnSorter = new ListViewColumnSorter();
-                    this.ListViewItemSorter = lvwColumnSorter;
+                    ListViewItemSorter = lvwColumnSorter;
                 }
             }
         }
@@ -495,14 +546,7 @@ namespace MetroFramework.Controls
             if (e.Column == lvwColumnSorter.SortColumn)
             {
                 // Reverse the current sort direction for this column.
-                if (lvwColumnSorter.Order == SortOrder.Ascending)
-                {
-                    lvwColumnSorter.Order = SortOrder.Descending;
-                }
-                else
-                {
-                    lvwColumnSorter.Order = SortOrder.Ascending;
-                }
+                lvwColumnSorter.Order = lvwColumnSorter.Order == SortOrder.Ascending ? SortOrder.Descending : SortOrder.Ascending;
             }
             else
             {
@@ -512,12 +556,12 @@ namespace MetroFramework.Controls
             }
 
             // Perform the sort with these new sort options.
-            this.Sort();
+            Sort();
         }
 
         void MetroListView_Resize(object sender, EventArgs e)
         {
-            if (this.Columns.Count <= 0) return;
+            if (Columns.Count <= 0) return;
         }
 
         [Description("Set the font of the button caption")]
@@ -537,9 +581,9 @@ namespace MetroFramework.Controls
         void MetroListView_DrawSubItem(object sender, DrawListViewSubItemEventArgs e)
         {
             Color itemForeColor = MetroPaint.ForeColor.Button.Disabled(Theme);
-            if (this.View == View.Details)
+            if (View == View.Details)
             {
-             
+
                 if (e.Item.Selected)
                 {
                     e.Graphics.FillRectangle(new SolidBrush(ControlPaint.Light(MetroPaint.GetStyleColor(Style), _offset)), e.Bounds);
@@ -549,13 +593,13 @@ namespace MetroFramework.Controls
                 TextFormatFlags align = TextFormatFlags.Left;
 
                 int _ded = 0, _left = 0;
-                if (this.CheckBoxes && e.ColumnIndex == 0)
+                if (CheckBoxes && e.ColumnIndex == 0)
                 {
                     _ded = 12; _left = 14;
                     int _top = (e.Bounds.Height / 2) - 6;
-                    using (Pen p = new Pen(itemForeColor))
+                    using (Pen p = new(itemForeColor))
                     {
-                        Rectangle boxRect = new Rectangle(e.Bounds.X + 2, e.Bounds.Y + _top, 12, 12);
+                        Rectangle boxRect = new(e.Bounds.X + 2, e.Bounds.Y + _top, 12, 12);
                         e.Graphics.DrawRectangle(p, boxRect);
                     }
 
@@ -564,61 +608,49 @@ namespace MetroFramework.Controls
                         Color fillColor = MetroPaint.GetStyleColor(Style);
                         if (e.Item.Selected) fillColor = Color.White;
 
-                        using (SolidBrush b = new SolidBrush(fillColor))
-                        {
-                            _top = (e.Bounds.Height / 2) - 4;
-                            Rectangle boxRect = new Rectangle(e.Bounds.X + 4, e.Bounds.Y + _top, 9, 9);
-                            e.Graphics.FillRectangle(b, boxRect);
-                        }
+                        using SolidBrush b = new(fillColor);
+                        _top = (e.Bounds.Height / 2) - 4;
+                        Rectangle boxRect = new(e.Bounds.X + 4, e.Bounds.Y + _top, 9, 9);
+                        e.Graphics.FillRectangle(b, boxRect);
                     }
                 }
 
-                if (this.SmallImageList != null)
+                if (SmallImageList != null)
                 {
-                    int _top = 0;
                     Image _img = null;
-                    if (e.Item.ImageIndex > -1) _img = this.SmallImageList.Images[e.Item.ImageIndex];
-                    if (e.Item.ImageKey != "") _img = this.SmallImageList.Images[e.Item.ImageKey];
+                    if (e.Item.ImageIndex > -1) _img = SmallImageList.Images[e.Item.ImageIndex];
+                    if (e.Item.ImageKey != "") _img = SmallImageList.Images[e.Item.ImageKey];
                     if (_img != null)
                     {
                         _left += _left > 0 ? 4 : 2;
-                        _top = (e.Item.Bounds.Height - _img.Height) / 2;
+                        int _top = (e.Item.Bounds.Height - _img.Height) / 2;
                         e.Graphics.DrawImage(_img, new Rectangle(e.Item.Bounds.Left + _left, e.Item.Bounds.Top + _top, _img.Width, _img.Height));
 
-                        _left += this.SmallImageList.ImageSize.Width;
-                        _ded += this.SmallImageList.ImageSize.Width;
+                        _left += SmallImageList.ImageSize.Width;
+                        _ded += SmallImageList.ImageSize.Width;
                     }
                 }
 
                 int _colWidth = e.Item.Bounds.Width;
-                if (this.View == View.Details) _colWidth = this.Columns[e.ColumnIndex].Width;
+                if (View == View.Details) _colWidth = Columns[e.ColumnIndex].Width;
 
-                using (StringFormat sf = new StringFormat())
+                using StringFormat sf = new();
+                sf.Alignment = e.Header.TextAlign switch
                 {
-                    switch (e.Header.TextAlign)
-                    {
-                        case HorizontalAlignment.Center:
-                            sf.Alignment = StringAlignment.Center;
-                            break;
-                        case HorizontalAlignment.Right:
-                            sf.Alignment = StringAlignment.Far;
-                            break;
-                        default:
-                            sf.Alignment = StringAlignment.Near;
-                            break;
-                    }
+                    HorizontalAlignment.Center => StringAlignment.Center,
+                    HorizontalAlignment.Right => StringAlignment.Far,
+                    _ => StringAlignment.Near,
+                };
 
-                    double subItemValue;
-                    if (e.ColumnIndex > 0 && Double.TryParse(e.SubItem.Text, NumberStyles.Currency, NumberFormatInfo.CurrentInfo, out subItemValue))
-                    {
-                        sf.Alignment = StringAlignment.Far;
-                    }
-
-
-                    //TextFormatFlags align = TextFormatFlags.Left;
-                    Rectangle rect = new Rectangle(e.Bounds.X + _left, e.Bounds.Y, _colWidth - _ded, e.Item.Bounds.Height);
-                    TextRenderer.DrawText(e.Graphics, e.SubItem.Text, stdFont, rect, itemForeColor, align | TextFormatFlags.SingleLine | TextFormatFlags.GlyphOverhangPadding | TextFormatFlags.VerticalCenter | TextFormatFlags.WordEllipsis);
+                if (e.ColumnIndex > 0 && Double.TryParse(e.SubItem.Text, NumberStyles.Currency, NumberFormatInfo.CurrentInfo, out double subItemValue))
+                {
+                    sf.Alignment = StringAlignment.Far;
                 }
+
+
+                //TextFormatFlags align = TextFormatFlags.Left;
+                Rectangle rect = new(e.Bounds.X + _left, e.Bounds.Y, _colWidth - _ded, e.Item.Bounds.Height);
+                TextRenderer.DrawText(e.Graphics, e.SubItem.Text, stdFont, rect, itemForeColor, align | TextFormatFlags.SingleLine | TextFormatFlags.GlyphOverhangPadding | TextFormatFlags.VerticalCenter | TextFormatFlags.WordEllipsis);
             }
             else
             {
@@ -629,7 +661,7 @@ namespace MetroFramework.Controls
         void MetroListView_DrawItem(object sender, DrawListViewItemEventArgs e)
         {
             Color itemForeColor = MetroPaint.ForeColor.Button.Disabled(Theme);
-            if (this.View == View.Details | this.View == View.List | this.View == View.SmallIcon)
+            if (View == View.Details | View == View.List | View == View.SmallIcon)
             {
                 Color fillColor = MetroPaint.GetStyleColor(Style);
 
@@ -643,74 +675,70 @@ namespace MetroFramework.Controls
                 TextFormatFlags align = TextFormatFlags.Left;
 
                 int _ded = 0, _left = 0;
-                if (this.CheckBoxes)
+                if (CheckBoxes)
                 {
                     _ded = 12; _left = 14;
                     int _top = (e.Bounds.Height / 2) - 6;
-                    using (Pen p = new Pen(itemForeColor))
+                    using (Pen p = new(itemForeColor))
                     {
-                        Rectangle boxRect = new Rectangle(e.Bounds.X + 2, e.Bounds.Y + _top, 12, 12);
+                        Rectangle boxRect = new(e.Bounds.X + 2, e.Bounds.Y + _top, 12, 12);
                         e.Graphics.DrawRectangle(p, boxRect);
                     }
 
                     if (e.Item.Checked)
                     {
-                        using (SolidBrush b = new SolidBrush(fillColor))
-                        {
-                            _top = (e.Bounds.Height / 2) - 4;
-                            Rectangle boxRect = new Rectangle(e.Bounds.X + 4, e.Bounds.Y + _top, 9, 9);
-                            e.Graphics.FillRectangle(b, boxRect);
-                        }
+                        using SolidBrush b = new(fillColor);
+                        _top = (e.Bounds.Height / 2) - 4;
+                        Rectangle boxRect = new(e.Bounds.X + 4, e.Bounds.Y + _top, 9, 9);
+                        e.Graphics.FillRectangle(b, boxRect);
                     }
                 }
 
-                if (this.SmallImageList != null)
+                if (SmallImageList != null)
                 {
-                    int _top = 0;
                     Image _img = null;
-                    if (e.Item.ImageIndex > -1) _img = this.SmallImageList.Images[e.Item.ImageIndex];
-                    if (e.Item.ImageKey != "") _img = this.SmallImageList.Images[e.Item.ImageKey];
+                    if (e.Item.ImageIndex > -1) _img = SmallImageList.Images[e.Item.ImageIndex];
+                    if (e.Item.ImageKey != "") _img = SmallImageList.Images[e.Item.ImageKey];
                     if (_img != null)
                     {
                         _left += _left > 0 ? 4 : 2;
-                        _top = (e.Item.Bounds.Height - _img.Height) / 2;
+                        int _top = (e.Item.Bounds.Height - _img.Height) / 2;
                         e.Graphics.DrawImage(_img, new Rectangle(e.Item.Bounds.Left + _left, e.Item.Bounds.Top + _top, _img.Width, _img.Height));
 
-                        _left += this.SmallImageList.ImageSize.Width;
-                        _ded += this.SmallImageList.ImageSize.Width;
+                        _left += SmallImageList.ImageSize.Width;
+                        _ded += SmallImageList.ImageSize.Width;
                     }
                 }
 
-                if (this.View == View.Details) return;
+                if (View == View.Details) return;
                 int _colWidth = e.Item.Bounds.Width;
-                if (this.View == View.Details) _colWidth = this.Columns[0].Width;
+                if (View == View.Details) _colWidth = Columns[0].Width;
 
-                Rectangle rect = new Rectangle(e.Bounds.X + _left, e.Bounds.Y, _colWidth - _ded, e.Item.Bounds.Height);
+                Rectangle rect = new(e.Bounds.X + _left, e.Bounds.Y, _colWidth - _ded, e.Item.Bounds.Height);
                 TextRenderer.DrawText(e.Graphics, e.Item.Text, stdFont, rect, itemForeColor, align | TextFormatFlags.SingleLine | TextFormatFlags.GlyphOverhangPadding | TextFormatFlags.VerticalCenter | TextFormatFlags.WordEllipsis);
             }
 
-            else if (this.View == View.Tile)
+            else if (View == View.Tile)
             {
                 int _left = 0;
 
-                if (this.LargeImageList != null)
+                if (LargeImageList != null)
                 {
-                    int _top = 0;
-                    _left = this.LargeImageList.ImageSize.Width + 2;
+                    _left = LargeImageList.ImageSize.Width + 2;
 
                     Image _img = null;
-                    if (e.Item.ImageIndex > -1) _img = this.LargeImageList.Images[e.Item.ImageIndex];
-                    if (e.Item.ImageKey != "") _img = this.LargeImageList.Images[e.Item.ImageKey];
+                    if (e.Item.ImageIndex > -1) _img = LargeImageList.Images[e.Item.ImageIndex];
+                    if (e.Item.ImageKey != "") _img = LargeImageList.Images[e.Item.ImageKey];
                     if (_img != null)
                     {
-                        _top = (e.Item.Bounds.Height - _img.Height) / 2;
+                        int _top = (e.Item.Bounds.Height - _img.Height) / 2;
                         e.Graphics.DrawImage(_img, new Rectangle(e.Item.Bounds.Left + _left, e.Item.Bounds.Top + _top, _img.Width, _img.Height));
                     }
                 }
 
                 if (e.Item.Selected)
                 {
-                    Rectangle rect = new Rectangle(e.Item.Bounds.X + _left, e.Item.Bounds.Y, e.Item.Bounds.Width, e.Item.Bounds.Height);
+                    Rectangle rect = new(e.Item.Bounds.X + _left, e.Item.Bounds.Y, e.Item.Bounds.Width, e.Item.Bounds.Height);
                     e.Graphics.FillRectangle(new SolidBrush(Color.FromArgb(250, 194, 87)), rect);
                 }
 
@@ -718,9 +746,9 @@ namespace MetroFramework.Controls
                 foreach (ListViewItem.ListViewSubItem item in e.Item.SubItems)
                 {
                     if (_fill > 0 && !e.Item.Selected) itemForeColor = Color.Silver;
-                    int _y = (e.Item.Bounds.Y + _fill) + ((e.Item.Bounds.Height - ((e.Item.SubItems.Count) * 15)) / 2);
+                    int _y = e.Item.Bounds.Y + _fill + ((e.Item.Bounds.Height - (e.Item.SubItems.Count * 15)) / 2);
 
-                    Rectangle rect = new Rectangle(e.Item.Bounds.X + _left, e.Item.Bounds.Y + _fill, e.Item.Bounds.Width, e.Item.Bounds.Height);
+                    Rectangle rect = new(e.Item.Bounds.X + _left, e.Item.Bounds.Y + _fill, e.Item.Bounds.Width, e.Item.Bounds.Height);
 
                     TextFormatFlags align = TextFormatFlags.Left;
                     TextRenderer.DrawText(e.Graphics, item.Text, new Font("Segoe UI", 9.0f), rect, itemForeColor, align | TextFormatFlags.SingleLine | TextFormatFlags.GlyphOverhangPadding | TextFormatFlags.WordEllipsis);
@@ -729,12 +757,12 @@ namespace MetroFramework.Controls
             }
             else
             {
-                if (this.CheckBoxes)
+                if (CheckBoxes)
                 {
                     int _top = (e.Bounds.Height / 2) - 6;
-                    using (Pen p = new Pen(Color.Black))
+                    using (Pen p = new(Color.Black))
                     {
-                        Rectangle boxRect = new Rectangle(e.Bounds.X + 6, e.Bounds.Y + _top, 12, 12);
+                        Rectangle boxRect = new(e.Bounds.X + 6, e.Bounds.Y + _top, 12, 12);
                         e.Graphics.DrawRectangle(p, boxRect);
                     }
 
@@ -742,21 +770,19 @@ namespace MetroFramework.Controls
                     {
                         Color fillColor = MetroPaint.GetStyleColor(Style);
                         if (e.Item.Selected) fillColor = Color.White;
-                        using (SolidBrush b = new SolidBrush(fillColor))
-                        {
-                            _top = (e.Bounds.Height / 2) - 4;
+                        using SolidBrush b = new(fillColor);
+                        _top = (e.Bounds.Height / 2) - 4;
 
-                            Rectangle boxRect = new Rectangle(e.Bounds.X + 8, e.Bounds.Y + _top, 9, 9);
-                            e.Graphics.FillRectangle(b, boxRect);
-                        }
+                        Rectangle boxRect = new(e.Bounds.X + 8, e.Bounds.Y + _top, 9, 9);
+                        e.Graphics.FillRectangle(b, boxRect);
                     }
 
-                    Rectangle rect = new Rectangle(e.Bounds.X + 23, e.Bounds.Y + 1, e.Bounds.Width, e.Bounds.Height);
+                    Rectangle rect = new(e.Bounds.X + 23, e.Bounds.Y + 1, e.Bounds.Width, e.Bounds.Height);
 
                     e.Graphics.DrawString(e.Item.Text, stdFont, new SolidBrush(itemForeColor), rect);
                 }
 
-                this.Font = stdFont;
+                Font = stdFont;
                 e.DrawDefault = true;
             }
         }
@@ -766,11 +792,9 @@ namespace MetroFramework.Controls
             Color _headColor = MetroPaint.ForeColor.Button.Press(Theme);
             e.Graphics.FillRectangle(new SolidBrush(MetroPaint.GetStyleColor(Style)), e.Bounds);
 
-            using (StringFormat sf = new StringFormat())
-            {
-                sf.Alignment = StringAlignment.Center;
-                e.Graphics.DrawString(e.Header.Text, stdFont, new SolidBrush(_headColor), e.Bounds, sf);
-            }
+            using StringFormat sf = new();
+            sf.Alignment = StringAlignment.Center;
+            e.Graphics.DrawString(e.Header.Text, stdFont, new SolidBrush(_headColor), e.Bounds, sf);
         }
     }
 }
@@ -788,129 +812,3 @@ namespace MetroFramework.Controls
 //        method.Invoke(control, new object[] { ControlStyles.OptimizedDoubleBuffer, enable });
 //    }
 //}
-
-public class ListViewColumnSorter : IComparer
-{
-    public enum SortModifiers
-    {
-        SortByImage,
-        SortByCheckbox,
-        SortByText
-    }
-
-    /// <summary>
-    /// Specifies the column to be sorted
-    /// </summary>
-    public int ColumnToSort;
-
-    /// <summary>
-    /// Specifies the order in which to sort (i.e. 'Ascending').
-    /// </summary>
-    public SortOrder OrderOfSort;
-
-    /// <summary>
-    /// Case insensitive comparer object
-    /// </summary>
-    private CaseInsensitiveComparer ObjectCompare;
-
-    private SortModifiers mySortModifier = SortModifiers.SortByText;
-    public SortModifiers _SortModifier
-    {
-        set
-        {
-            mySortModifier = value;
-        }
-        get
-        {
-            return mySortModifier;
-        }
-    }
-
-    /// <summary>
-    /// Class constructor.  Initializes various elements
-    /// </summary>
-    public ListViewColumnSorter()
-    {
-        // Initialize the column to '0'
-        ColumnToSort = 0;
-
-        // Initialize the CaseInsensitiveComparer object
-        ObjectCompare = new CaseInsensitiveComparer();
-    }
-
-    /// <summary>
-    /// This method is inherited from the IComparer interface.  It compares the two objects passed using a case insensitive comparison.
-    /// </summary>
-    /// <param name="x">First object to be compared</param>
-    /// <param name="y">Second object to be compared</param>
-    /// <returns>The result of the comparison. "0" if equal, negative if 'x' is less than 'y' and positive if 'x' is greater than 'y'</returns>
-    public int Compare(object x, object y)
-    {
-        int compareResult = 0;
-        ListViewItem listviewX, listviewY;
-
-        // Cast the objects to be compared to ListViewItem objects
-        listviewX = (ListViewItem)x;
-        listviewY = (ListViewItem)y;
-
-        DateTime dateX;
-        DateTime dateY;
-
-        if (DateTime.TryParse(listviewX.SubItems[ColumnToSort].Text, out dateX) &&
-            DateTime.TryParse(listviewY.SubItems[ColumnToSort].Text, out dateY))
-        {
-            compareResult = ObjectCompare.Compare(dateX, dateY);
-        }
-        else
-        {
-            compareResult = ObjectCompare.Compare(listviewX.SubItems[ColumnToSort].Text, listviewY.SubItems[ColumnToSort].Text);
-        }
-
-        // Calculate correct return value based on object comparison
-        if (OrderOfSort == SortOrder.Ascending)
-        {
-            // Ascending sort is selected, return normal result of compare operation
-            return compareResult;
-        }
-        else if (OrderOfSort == SortOrder.Descending)
-        {
-            // Descending sort is selected, return negative result of compare operation
-            return (-compareResult);
-        }
-        else
-        {
-            // Return '0' to indicate they are equal
-            return 0;
-        }
-    }
-
-    /// <summary>
-    /// Gets or sets the number of the column to which to apply the sorting operation (Defaults to '0').
-    /// </summary>
-    public int SortColumn
-    {
-        set
-        {
-            ColumnToSort = value;
-        }
-        get
-        {
-            return ColumnToSort;
-        }
-    }
-
-    /// <summary>
-    /// Gets or sets the order of sorting to apply (for example, 'Ascending' or 'Descending').
-    /// </summary>
-    public SortOrder Order
-    {
-        set
-        {
-            OrderOfSort = value;
-        }
-        get
-        {
-            return OrderOfSort;
-        }
-    }
-}

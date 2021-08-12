@@ -40,7 +40,7 @@ namespace MetroFramework.Animation
                 },
                 delegate
                 {
-                    return (control.Location.Equals(targetPoint));
+                    return control.Location.Equals(targetPoint);
                 });
         }
 

@@ -21,15 +21,15 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE 
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-using System;
-using System.Drawing;
-using System.Drawing.Drawing2D;
-using System.ComponentModel;
-using System.Windows.Forms;
-
 using MetroFramework.Components;
 using MetroFramework.Drawing;
 using MetroFramework.Interfaces;
+
+using System;
+using System.ComponentModel;
+using System.Drawing;
+using System.Drawing.Drawing2D;
+using System.Windows.Forms;
 
 namespace MetroFramework.Controls
 {
@@ -76,21 +76,11 @@ namespace MetroFramework.Controls
         {
             get
             {
-                if (DesignMode || metroStyle != MetroColorStyle.Default)
-                {
-                    return metroStyle;
-                }
-
-                if (StyleManager != null && metroStyle == MetroColorStyle.Default)
-                {
-                    return StyleManager.Style;
-                }
-                if (StyleManager == null && metroStyle == MetroColorStyle.Default)
-                {
-                    return MetroDefaults.Style;
-                }
-
-                return metroStyle;
+                return DesignMode || metroStyle != MetroColorStyle.Default
+                    ? metroStyle
+                    : StyleManager != null && metroStyle == MetroColorStyle.Default
+                    ? StyleManager.Style
+                    : StyleManager == null && metroStyle == MetroColorStyle.Default ? MetroDefaults.Style : metroStyle;
             }
             set { metroStyle = value; }
         }
@@ -102,60 +92,30 @@ namespace MetroFramework.Controls
         {
             get
             {
-                if (DesignMode || metroTheme != MetroThemeStyle.Default)
-                {
-                    return metroTheme;
-                }
-
-                if (StyleManager != null && metroTheme == MetroThemeStyle.Default)
-                {
-                    return StyleManager.Theme;
-                }
-                if (StyleManager == null && metroTheme == MetroThemeStyle.Default)
-                {
-                    return MetroDefaults.Theme;
-                }
-
-                return metroTheme;
+                return DesignMode || metroTheme != MetroThemeStyle.Default
+                    ? metroTheme
+                    : StyleManager != null && metroTheme == MetroThemeStyle.Default
+                    ? StyleManager.Theme
+                    : StyleManager == null && metroTheme == MetroThemeStyle.Default ? MetroDefaults.Theme : metroTheme;
             }
             set { metroTheme = value; }
         }
 
-        private MetroStyleManager metroStyleManager = null;
         [Browsable(false)]
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public MetroStyleManager StyleManager
-        {
-            get { return metroStyleManager; }
-            set { metroStyleManager = value; }
-        }
+        public MetroStyleManager StyleManager { get; set; } = null;
 
-        private bool useCustomBackColor = false;
         [DefaultValue(false)]
         [Category(MetroDefaults.PropertyCategory.Appearance)]
-        public bool UseCustomBackColor
-        {
-            get { return useCustomBackColor; }
-            set { useCustomBackColor = value; }
-        }
+        public bool UseCustomBackColor { get; set; } = false;
 
-        private bool useCustomForeColor = false;
         [DefaultValue(false)]
         [Category(MetroDefaults.PropertyCategory.Appearance)]
-        public bool UseCustomForeColor
-        {
-            get { return useCustomForeColor; }
-            set { useCustomForeColor = value; }
-        }
+        public bool UseCustomForeColor { get; set; } = false;
 
-        private bool useStyleColors = false;
         [DefaultValue(false)]
         [Category(MetroDefaults.PropertyCategory.Appearance)]
-        public bool UseStyleColors
-        {
-            get { return useStyleColors; }
-            set { useStyleColors = value; }
-        }
+        public bool UseStyleColors { get; set; } = false;
 
         [Browsable(false)]
         [Category(MetroDefaults.PropertyCategory.Behaviour)]
@@ -170,32 +130,17 @@ namespace MetroFramework.Controls
 
         #region Fields
 
-        private bool displayFocusRectangle = false;
         [DefaultValue(false)]
         [Category(MetroDefaults.PropertyCategory.Appearance)]
-        public bool DisplayFocus
-        {
-            get { return displayFocusRectangle; }
-            set { displayFocusRectangle = value; }
-        }
+        public bool DisplayFocus { get; set; } = false;
 
-        private MetroCheckBoxSize metroCheckBoxSize = MetroCheckBoxSize.Small;
         [DefaultValue(MetroCheckBoxSize.Small)]
         [Category(MetroDefaults.PropertyCategory.Appearance)]
-        public MetroCheckBoxSize FontSize
-        {
-            get { return metroCheckBoxSize; }
-            set { metroCheckBoxSize = value; }
-        }
+        public MetroCheckBoxSize FontSize { get; set; } = MetroCheckBoxSize.Small;
 
-        private MetroCheckBoxWeight metroCheckBoxWeight = MetroCheckBoxWeight.Regular;
         [DefaultValue(MetroCheckBoxWeight.Regular)]
         [Category(MetroDefaults.PropertyCategory.Appearance)]
-        public MetroCheckBoxWeight FontWeight
-        {
-            get { return metroCheckBoxWeight; }
-            set { metroCheckBoxWeight = value; }
-        }
+        public MetroCheckBoxWeight FontWeight { get; set; } = MetroCheckBoxWeight.Regular;
 
         [Browsable(false)]
         public override Font Font
@@ -236,7 +181,7 @@ namespace MetroFramework.Controls
             {
                 Color backColor = BackColor;
 
-                if (!useCustomBackColor)
+                if (!UseCustomBackColor)
                 {
                     backColor = MetroPaint.BackColor.Form(Theme);
                     if (Parent is MetroTile)
@@ -283,26 +228,15 @@ namespace MetroFramework.Controls
         {
             Color borderColor, foreColor;
 
-            if (useCustomForeColor)
+            if (UseCustomForeColor)
             {
                 foreColor = ForeColor;
 
-                if (isHovered && !isPressed && Enabled)
-                {
-                    borderColor = MetroPaint.BorderColor.CheckBox.Hover(Theme);
-                }
-                else if (isHovered && isPressed && Enabled)
-                {
-                    borderColor = MetroPaint.BorderColor.CheckBox.Press(Theme);
-                }
-                else if (!Enabled)
-                {
-                    borderColor = MetroPaint.BorderColor.CheckBox.Disabled(Theme);
-                }
-                else
-                {
-                    borderColor = MetroPaint.BorderColor.CheckBox.Normal(Theme);
-                }
+                borderColor = isHovered && !isPressed && Enabled
+                    ? MetroPaint.BorderColor.CheckBox.Hover(Theme)
+                    : isHovered && isPressed && Enabled
+                        ? MetroPaint.BorderColor.CheckBox.Press(Theme)
+                        : !Enabled ? MetroPaint.BorderColor.CheckBox.Disabled(Theme) : MetroPaint.BorderColor.CheckBox.Normal(Theme);
             }
             else
             {
@@ -323,16 +257,16 @@ namespace MetroFramework.Controls
                 }
                 else
                 {
-                    foreColor = !useStyleColors ? MetroPaint.ForeColor.CheckBox.Normal(Theme) : MetroPaint.GetStyleColor(Style);
+                    foreColor = !UseStyleColors ? MetroPaint.ForeColor.CheckBox.Normal(Theme) : MetroPaint.GetStyleColor(Style);
                     borderColor = MetroPaint.BorderColor.CheckBox.Normal(Theme);
                 }
             }
 
             e.Graphics.SmoothingMode = SmoothingMode.HighQuality;
 
-            using (Pen p = new Pen(borderColor))
+            using (Pen p = new(borderColor))
             {
-                Rectangle boxRect = new Rectangle(0, Height / 2 - 6, 12, 12);
+                Rectangle boxRect = new(0, (Height / 2) - 6, 12, 12);
                 e.Graphics.DrawEllipse(p, boxRect);
             }
 
@@ -340,21 +274,19 @@ namespace MetroFramework.Controls
             {
                 Color fillColor = MetroPaint.GetStyleColor(Style);
 
-                using (SolidBrush b = new SolidBrush(fillColor))
-                {
-                    Rectangle boxRect = new Rectangle(3, Height / 2 - 3, 6, 6);
-                    e.Graphics.FillEllipse(b, boxRect);
-                }
+                using SolidBrush b = new(fillColor);
+                Rectangle boxRect = new(3, (Height / 2) - 3, 6, 6);
+                e.Graphics.FillEllipse(b, boxRect);
             }
 
             e.Graphics.SmoothingMode = SmoothingMode.Default;
 
-            Rectangle textRect = new Rectangle(16, 0, Width - 16, Height);
-            TextRenderer.DrawText(e.Graphics, Text, MetroFonts.CheckBox(metroCheckBoxSize, metroCheckBoxWeight), textRect, foreColor, MetroPaint.GetTextFormatFlags(TextAlign));
+            Rectangle textRect = new(16, 0, Width - 16, Height);
+            TextRenderer.DrawText(e.Graphics, Text, MetroFonts.CheckBox(FontSize, FontWeight), textRect, foreColor, MetroPaint.GetTextFormatFlags(TextAlign));
 
             OnCustomPaintForeground(new MetroPaintEventArgs(Color.Empty, foreColor, e.Graphics));
 
-            if (displayFocusRectangle && isFocused)
+            if (DisplayFocus && isFocused)
                 ControlPaint.DrawFocusRectangle(e.Graphics, ClientRectangle);
         }
 
@@ -494,7 +426,7 @@ namespace MetroFramework.Controls
             using (var g = CreateGraphics())
             {
                 proposedSize = new Size(int.MaxValue, int.MaxValue);
-                preferredSize = TextRenderer.MeasureText(g, Text, MetroFonts.CheckBox(metroCheckBoxSize, metroCheckBoxWeight), proposedSize, MetroPaint.GetTextFormatFlags(TextAlign));
+                preferredSize = TextRenderer.MeasureText(g, Text, MetroFonts.CheckBox(FontSize, FontWeight), proposedSize, MetroPaint.GetTextFormatFlags(TextAlign));
                 preferredSize.Width += 16;
             }
 

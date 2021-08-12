@@ -26,22 +26,16 @@
  */
 using System;
 using System.Collections.Generic;
-using System.Text;
-using System.Text.RegularExpressions;
 using System.Drawing;
+using System.Text.RegularExpressions;
 
 namespace MetroFramework.Drawing.Html
 {
     public class InitialContainer : CssBox
     {
         #region Fields
-        private Dictionary<string, Dictionary<string, CssBlock>> _media_blocks;
-        private string _documentSource;
-        private bool _avoidGeometryAntialias;
         private SizeF _maxSize;
         private PointF _scrollOffset;
-        private Dictionary<CssBox, RectangleF> _linkRegions;
-        private bool _avoidTextAntialias;
         #endregion
 
         #region Ctor
@@ -49,8 +43,8 @@ namespace MetroFramework.Drawing.Html
         public InitialContainer()
         {
             _initialContainer = this;
-            _media_blocks = new Dictionary<string, Dictionary<string, CssBlock>>();
-            _linkRegions = new Dictionary<CssBox, RectangleF>();
+            MediaBlocks = new Dictionary<string, Dictionary<string, CssBlock>>();
+            LinkRegions = new Dictionary<CssBox, RectangleF>();
             MediaBlocks.Add("all", new Dictionary<string, CssBlock>());
 
             Display = CssConstants.Block;
@@ -61,7 +55,7 @@ namespace MetroFramework.Drawing.Html
         public InitialContainer(string documentSource)
             : this()
         {
-            _documentSource = documentSource;
+            DocumentSource = documentSource;
             ParseDocument();
             CascadeStyles(this);
             BlockCorrection(this);
@@ -74,10 +68,7 @@ namespace MetroFramework.Drawing.Html
         /// <summary>
         /// Gets the link regions of the container
         /// </summary>
-        internal Dictionary<CssBox, RectangleF> LinkRegions
-        {
-            get { return _linkRegions; }
-        }
+        internal Dictionary<CssBox, RectangleF> LinkRegions { get; }
 
 
         /// <summary>
@@ -93,38 +84,24 @@ namespace MetroFramework.Drawing.Html
         /// 
         /// MediaBlocks["all"]["strong"].Properties
         /// </remarks>
-        public Dictionary<string, Dictionary<string, CssBlock>> MediaBlocks
-        {
-            get { return _media_blocks; }
-        }
+        public Dictionary<string, Dictionary<string, CssBlock>> MediaBlocks { get; }
 
         /// <summary>
         /// Gets the document's source
         /// </summary>
-        public string DocumentSource
-        {
-            get { return _documentSource; }
-        }
+        public string DocumentSource { get; }
 
         /// <summary>
         /// Gets or sets a value indicating if antialiasing should be avoided 
         /// for geometry like backgrounds and borders
         /// </summary>
-        public bool AvoidGeometryAntialias
-        {
-            get { return _avoidGeometryAntialias; }
-            set { _avoidGeometryAntialias = value; }
-        }
+        public bool AvoidGeometryAntialias { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating if antialiasing should be avoided
         /// for text rendering
         /// </summary>
-        public bool AvoidTextAntialias
-        {
-            get { return _avoidTextAntialias; }
-            set { _avoidTextAntialias = value; }
-        }
+        public bool AvoidTextAntialias { get; set; }
 
         /// <summary>
         /// Gets or sets the maximum size of the container
@@ -166,14 +143,14 @@ namespace MetroFramework.Drawing.Html
             {
                 stylesheet = stylesheet.Remove(comments[0].Index, comments[0].Length);
             }
-            
+
             #endregion
 
             #region Extract @media blocks
 
             //MatchCollection atrules = Parser.Match(Parser.CssAtRules, stylesheet);
 
-            for(MatchCollection atrules = Parser.Match(Parser.CssAtRules, stylesheet); atrules.Count > 0; atrules = Parser.Match(Parser.CssAtRules, stylesheet))
+            for (MatchCollection atrules = Parser.Match(Parser.CssAtRules, stylesheet); atrules.Count > 0; atrules = Parser.Match(Parser.CssAtRules, stylesheet))
             {
                 Match match = atrules[0];
 
@@ -196,7 +173,7 @@ namespace MetroFramework.Drawing.Html
                     if (line.StartsWith("@media") && line.EndsWith("{"))
                     {
                         //Get specified media types in the at-rule
-                        string[] media = line.Substring(6, line.Length - 7).Split(' ');
+                        string[] media = line[6..^1].Split(' ');
 
                         //Scan media types
                         for (int i = 0; i < media.Length; i++)
@@ -242,7 +219,7 @@ namespace MetroFramework.Drawing.Html
             if (string.IsNullOrEmpty(media)) media = "all";
 
             int bracketIndex = block.IndexOf("{");
-            string blockSource = block.Substring(bracketIndex).Replace("{", string.Empty).Replace("}", string.Empty);
+            string blockSource = block[bracketIndex..].Replace("{", string.Empty).Replace("}", string.Empty);
 
             if (bracketIndex < 0) return;
 
@@ -258,9 +235,9 @@ namespace MetroFramework.Drawing.Html
 
             for (int i = 0; i < classes.Length; i++)
             {
-                string className = classes[i].Trim(); if(string.IsNullOrEmpty(className)) continue;
+                string className = classes[i].Trim(); if (string.IsNullOrEmpty(className)) continue;
 
-                CssBlock newblock = new CssBlock(blockSource);
+                CssBlock newblock = new(blockSource);
 
                 //Create media blocks if necessary
                 if (!MediaBlocks.ContainsKey(media)) MediaBlocks.Add(media, new Dictionary<string, CssBlock>());
@@ -309,40 +286,40 @@ namespace MetroFramework.Drawing.Html
 
                 if (!string.IsNullOrEmpty(text.Trim()))
                 {
-                    CssAnonymousBox abox = new CssAnonymousBox(curBox);
+                    CssAnonymousBox abox = new(curBox);
                     abox.Text = text;
                 }
-                else if(text != null && text.Length > 0)
+                else if (text != null && text.Length > 0)
                 {
-                    CssAnonymousSpaceBox sbox = new CssAnonymousSpaceBox(curBox);
+                    CssAnonymousSpaceBox sbox = new(curBox);
                     sbox.Text = text;
                 }
 
-                HtmlTag tag = new HtmlTag(tagmatch.Value);
-                
+                HtmlTag tag = new(tagmatch.Value);
+
                 if (tag.IsClosing)
                 {
                     curBox = FindParent(tag.TagName, curBox);
                 }
-                else if(tag.IsSingle)
+                else if (tag.IsSingle)
                 {
-                    CssBox foo = new CssBox(curBox, tag);
+                    CssBox foo = new(curBox, tag);
                 }
                 else
                 {
                     curBox = new CssBox(curBox, tag);
                 }
 
-                
+
 
                 lastEnd = tagmatch.Index + tagmatch.Length - 1;
-            }               
-            
-            string finaltext = DocumentSource.Substring((lastEnd > 0 ? lastEnd + 1 : 0), DocumentSource.Length - lastEnd - 1 + (lastEnd == 0 ? 1 : 0)) ;
+            }
+
+            string finaltext = DocumentSource.Substring(lastEnd > 0 ? lastEnd + 1 : 0, DocumentSource.Length - lastEnd - 1 + (lastEnd == 0 ? 1 : 0));
 
             if (!string.IsNullOrEmpty(finaltext))
             {
-                CssAnonymousBox abox = new CssAnonymousBox(curBox);
+                CssAnonymousBox abox = new(curBox);
                 abox.Text = finaltext;
             }
         }
@@ -354,18 +331,11 @@ namespace MetroFramework.Drawing.Html
         /// <param name="b"></param>
         private CssBox FindParent(string tagName, CssBox b)
         {
-            if (b == null)
-            {
-                return InitialContainer;
-            }
-            else if (b.HtmlTag != null && b.HtmlTag.TagName.Equals(tagName, StringComparison.CurrentCultureIgnoreCase))
-            {
-                return b.ParentBox == null ? InitialContainer : b.ParentBox;
-            }
-            else
-            {
-                return FindParent(tagName, b.ParentBox);
-            }
+            return b == null
+                ? InitialContainer
+                : b.HtmlTag != null && b.HtmlTag.TagName.Equals(tagName, StringComparison.CurrentCultureIgnoreCase)
+                    ? b.ParentBox ?? InitialContainer
+                    : FindParent(tagName, b.ParentBox);
         }
 
         /// <summary>
@@ -393,13 +363,13 @@ namespace MetroFramework.Drawing.Html
                     {
                         MediaBlocks["all"]["." + b.HtmlTag.Attributes["class"]].AssignTo(b);
                     }
-                    
+
                     b.HtmlTag.TranslateAttributes(b);
 
                     //Check for the style="" attribute
                     if (b.HtmlTag.HasAttribute("style"))
                     {
-                        CssBlock block = new CssBlock(b.HtmlTag.Attributes["style"]);
+                        CssBlock block = new(b.HtmlTag.Attributes["style"]);
                         block.AssignTo(b);
                     }
 
@@ -408,7 +378,7 @@ namespace MetroFramework.Drawing.Html
                         b.Boxes.Count == 1)
                     {
                         FeedStyleSheet(b.Boxes[0].Text);
-                    } 
+                    }
 
                     //Check for the <link rel=stylesheet> tag
                     if (b.HtmlTag.TagName.Equals("link", StringComparison.CurrentCultureIgnoreCase) &&
@@ -428,7 +398,7 @@ namespace MetroFramework.Drawing.Html
                     box.Display = CssConstants.Block;
                 }
             }
-            
+
         }
 
         /// <summary>
@@ -451,13 +421,13 @@ namespace MetroFramework.Drawing.Html
 
                     if (group.Count == 1 && group[0] is CssAnonymousSpaceBox)
                     {
-                        CssAnonymousSpaceBlockBox sbox = new CssAnonymousSpaceBlockBox(startBox, group[0]);
+                        CssAnonymousSpaceBlockBox sbox = new(startBox, group[0]);
 
                         group[0].ParentBox = sbox;
                     }
                     else
                     {
-                        CssAnonymousBlockBox newbox = new CssAnonymousBlockBox(startBox, group[0]);
+                        CssAnonymousBlockBox newbox = new(startBox, group[0]);
 
                         foreach (CssBox inline in group)
                         {
@@ -480,7 +450,7 @@ namespace MetroFramework.Drawing.Html
         /// <returns></returns>
         private List<List<CssBox>> BlockCorrection_GetInlineGroups(CssBox box)
         {
-            List<List<CssBox>> result = new List<List<CssBox>>();
+            List<List<CssBox>> result = new();
             List<CssBox> current = null;
 
             //Scan boxes
@@ -506,7 +476,7 @@ namespace MetroFramework.Drawing.Html
 
 
             //If last list contains nothing, erase it
-            if (result.Count > 0 && result[result.Count - 1].Count == 0)
+            if (result.Count > 0 && result[^1].Count == 0)
             {
                 result.RemoveAt(result.Count - 1);
             }

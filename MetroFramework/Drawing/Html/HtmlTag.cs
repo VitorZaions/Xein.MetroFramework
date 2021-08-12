@@ -24,9 +24,7 @@
  * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF 
  * THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Text.RegularExpressions;
 
 namespace MetroFramework.Drawing.Html
@@ -35,9 +33,6 @@ namespace MetroFramework.Drawing.Html
     {
         #region Fields
 
-        private string _tagName;
-        private bool _isClosing;
-        private Dictionary<string, string> _attributes;
 
         #endregion
 
@@ -45,34 +40,27 @@ namespace MetroFramework.Drawing.Html
 
         private HtmlTag()
         {
-            _attributes = new Dictionary<string, string>();
+            Attributes = new Dictionary<string, string>();
         }
 
         public HtmlTag(string tag)
             : this()
         {
-            tag = tag.Substring(1, tag.Length - 2);
+            tag = tag[1..^1];
 
             int spaceIndex = tag.IndexOf(" ");
 
             //Extract tag name
-            if (spaceIndex < 0)
-            {
-                _tagName = tag;
-            }
-            else
-            {
-                _tagName = tag.Substring(0, spaceIndex);
-            }
+            TagName = spaceIndex < 0 ? tag : tag.Substring(0, spaceIndex);
 
             //Check if is end tag
-            if (_tagName.StartsWith("/"))
+            if (TagName.StartsWith("/"))
             {
-                _isClosing = true;
-                _tagName = _tagName.Substring(1);
+                IsClosing = true;
+                TagName = TagName[1..];
             }
 
-            _tagName = _tagName.ToLower();
+            TagName = TagName.ToLower();
 
             //Extract attributes
             MatchCollection atts = Parser.Match(Parser.HmlTagAttributes, tag);
@@ -84,7 +72,7 @@ namespace MetroFramework.Drawing.Html
 
                 if (chunks.Length == 1)
                 {
-                    if(!Attributes.ContainsKey(chunks[0]))
+                    if (!Attributes.ContainsKey(chunks[0]))
                         Attributes.Add(chunks[0].ToLower(), string.Empty);
                 }
                 else if (chunks.Length == 2)
@@ -94,7 +82,7 @@ namespace MetroFramework.Drawing.Html
 
                     if (attvalue.StartsWith("\"") && attvalue.EndsWith("\"") && attvalue.Length > 2)
                     {
-                        attvalue = attvalue.Substring(1, attvalue.Length - 2);
+                        attvalue = attvalue[1..^1];
                     }
 
                     if (!Attributes.ContainsKey(attname))
@@ -110,27 +98,18 @@ namespace MetroFramework.Drawing.Html
         /// <summary>
         /// Gets the dictionary of attributes in the tag
         /// </summary>
-        public Dictionary<string, string> Attributes
-        {
-            get { return _attributes; }
-        }
+        public Dictionary<string, string> Attributes { get; }
 
 
         /// <summary>
         /// Gets the name of this tag
         /// </summary>
-        public string TagName
-        {
-            get { return _tagName; }
-        }
+        public string TagName { get; }
 
         /// <summary>
         /// Gets if the tag is actually a closing tag
         /// </summary>
-        public bool IsClosing
-        {
-            get { return _isClosing; }
-        }
+        public bool IsClosing { get; }
 
         /// <summary>
         /// Gets if the tag is single placed; in other words it doesn't need a closing tag; 
@@ -141,13 +120,13 @@ namespace MetroFramework.Drawing.Html
             get
             {
                 return TagName.StartsWith("!")
-                    || (new List<string>(
+                    || new List<string>(
                             new string[]{
                              "area", "base", "basefont", "br", "col",
                              "frame", "hr", "img", "input", "isindex",
                              "link", "meta", "param"
                             }
-                        )).Contains(TagName)
+                        ).Contains(TagName)
                     ;
             }
         }
@@ -163,20 +142,20 @@ namespace MetroFramework.Drawing.Html
                 switch (att)
                 {
                     case HtmlConstants.align:
-                        if (value == HtmlConstants.left || value == HtmlConstants.center || value == HtmlConstants.right || value == HtmlConstants.justify)
+                        if (value is HtmlConstants.left or HtmlConstants.center or HtmlConstants.right or HtmlConstants.justify)
                             box.TextAlign = value;
                         else
                             box.VerticalAlign = value;
                         break;
                     case HtmlConstants.background:
-                            box.BackgroundImage = value;
+                        box.BackgroundImage = value;
                         break;
                     case HtmlConstants.bgcolor:
                         box.BackgroundColor = value;
                         break;
                     case HtmlConstants.border:
                         box.BorderWidth = TranslateLength(value);
-                        
+
                         if (t == HtmlConstants.TABLE)
                         {
                             ApplyTableBorder(box, value);
@@ -242,14 +221,9 @@ namespace MetroFramework.Drawing.Html
         /// <returns></returns>
         private string TranslateLength(string htmlLength)
         {
-            CssLength len = new CssLength(htmlLength);
+            CssLength len = new(htmlLength);
 
-            if (len.HasError)
-            {
-                return htmlLength + "px";
-            }
-
-            return htmlLength;
+            return len.HasError ? htmlLength + "px" : htmlLength;
         }
 
         /// <summary>

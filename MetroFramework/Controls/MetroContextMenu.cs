@@ -1,12 +1,10 @@
-﻿using MetroFramework;
-using MetroFramework.Components;
+﻿using MetroFramework.Components;
 using MetroFramework.Drawing;
 using MetroFramework.Interfaces;
+
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
-using System.Text;
 using System.Windows.Forms;
 
 namespace MetroFramework.Controls
@@ -52,21 +50,11 @@ namespace MetroFramework.Controls
         {
             get
             {
-                if (DesignMode || metroStyle != MetroColorStyle.Default)
-                {
-                    return metroStyle;
-                }
-
-                if (StyleManager != null && metroStyle == MetroColorStyle.Default)
-                {
-                    return StyleManager.Style;
-                }
-                if (StyleManager == null && metroStyle == MetroColorStyle.Default)
-                {
-                    return MetroColorStyle.Blue;
-                }
-
-                return metroStyle;
+                return DesignMode || metroStyle != MetroColorStyle.Default
+                    ? metroStyle
+                    : StyleManager != null && metroStyle == MetroColorStyle.Default
+                    ? StyleManager.Style
+                    : StyleManager == null && metroStyle == MetroColorStyle.Default ? MetroColorStyle.Blue : metroStyle;
             }
             set { metroStyle = value; }
         }
@@ -78,21 +66,11 @@ namespace MetroFramework.Controls
         {
             get
             {
-                if (DesignMode || metroTheme != MetroThemeStyle.Default)
-                {
-                    return metroTheme;
-                }
-
-                if (StyleManager != null && metroTheme == MetroThemeStyle.Default)
-                {
-                    return StyleManager.Theme;
-                }
-                if (StyleManager == null && metroTheme == MetroThemeStyle.Default)
-                {
-                    return MetroThemeStyle.Light;
-                }
-
-                return metroTheme;
+                return DesignMode || metroTheme != MetroThemeStyle.Default
+                    ? metroTheme
+                    : StyleManager != null && metroTheme == MetroThemeStyle.Default
+                    ? StyleManager.Theme
+                    : StyleManager == null && metroTheme == MetroThemeStyle.Default ? MetroThemeStyle.Light : metroTheme;
             }
             set { metroTheme = value; }
         }
@@ -106,36 +84,21 @@ namespace MetroFramework.Controls
             set
             {
                 metroStyleManager = value;
-                settheme();
+                SetTheme();
             }
         }
 
-        private bool useCustomBackColor = false;
         [DefaultValue(false)]
         [Category("Metro Appearance")]
-        public bool UseCustomBackColor
-        {
-            get { return useCustomBackColor; }
-            set { useCustomBackColor = value; }
-        }
+        public bool UseCustomBackColor { get; set; } = false;
 
-        private bool useCustomForeColor = false;
         [DefaultValue(false)]
         [Category("Metro Appearance")]
-        public bool UseCustomForeColor
-        {
-            get { return useCustomForeColor; }
-            set { useCustomForeColor = value; }
-        }
+        public bool UseCustomForeColor { get; set; } = false;
 
-        private bool useStyleColors = false;
         [DefaultValue(false)]
         [Category("Metro Appearance")]
-        public bool UseStyleColors
-        {
-            get { return useStyleColors; }
-            set { useStyleColors = value; }
-        }
+        public bool UseStyleColors { get; set; } = false;
 
         [Browsable(false)]
         [Category("Metro Behaviour")]
@@ -157,17 +120,17 @@ namespace MetroFramework.Controls
             }
         }
 
-        private void settheme()
+        private void SetTheme()
         {
-            this.BackColor = MetroPaint.BackColor.Form(Theme);
-            this.ForeColor = MetroPaint.ForeColor.Button.Normal(Theme);
-            this.Renderer = new MetroCTXRenderer(Theme, Style);
+            BackColor = MetroPaint.BackColor.Form(Theme);
+            ForeColor = MetroPaint.ForeColor.Button.Normal(Theme);
+            Renderer = new MetroCTXRenderer(Theme, Style);
         }
 
         private class MetroCTXRenderer : ToolStripProfessionalRenderer
         {
-            MetroFramework.MetroThemeStyle _theme;
-            public MetroCTXRenderer(MetroFramework.MetroThemeStyle Theme, MetroColorStyle Style) : base(new contextcolors(Theme, Style)) 
+            readonly MetroThemeStyle _theme;
+            public MetroCTXRenderer(MetroThemeStyle Theme, MetroColorStyle Style) : base(new ContextColors(Theme, Style))
             {
                 _theme = Theme;
             }
@@ -179,12 +142,12 @@ namespace MetroFramework.Controls
             }
         }
 
-        private class contextcolors : ProfessionalColorTable
+        private class ContextColors : ProfessionalColorTable
         {
-            MetroThemeStyle _theme = MetroThemeStyle.Light;
-            MetroColorStyle _style = MetroColorStyle.Blue;
+            readonly MetroThemeStyle _theme = MetroThemeStyle.Light;
+            readonly MetroColorStyle _style = MetroColorStyle.Blue;
 
-            public contextcolors(MetroFramework.MetroThemeStyle Theme, MetroColorStyle Style)
+            public ContextColors(MetroThemeStyle Theme, MetroColorStyle Style)
             {
                 _theme = Theme;
                 _style = Style;

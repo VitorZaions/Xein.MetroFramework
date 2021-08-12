@@ -21,15 +21,14 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE 
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-using System;
-using System.Drawing;
-using System.ComponentModel;
-using System.Windows.Forms;
-
 using MetroFramework.Components;
 using MetroFramework.Drawing;
 using MetroFramework.Interfaces;
-using System.Drawing.Imaging;
+
+using System;
+using System.ComponentModel;
+using System.Drawing;
+using System.Windows.Forms;
 
 namespace MetroFramework.Controls
 {
@@ -40,14 +39,9 @@ namespace MetroFramework.Controls
     {
         #region Interface
 
-        private bool displayFocusRectangle = false;
         [DefaultValue(false)]
         [Category(MetroDefaults.PropertyCategory.Appearance)]
-        public bool DisplayFocus
-        {
-            get { return displayFocusRectangle; }
-            set { displayFocusRectangle = value; }
-        }
+        public bool DisplayFocus { get; set; } = false;
 
         [Category(MetroDefaults.PropertyCategory.Appearance)]
         public event EventHandler<MetroPaintEventArgs> CustomPaintBackground;
@@ -86,21 +80,11 @@ namespace MetroFramework.Controls
         {
             get
             {
-                if (DesignMode || metroStyle != MetroColorStyle.Default)
-                {
-                    return metroStyle;
-                }
-
-                if (StyleManager != null && metroStyle == MetroColorStyle.Default)
-                {
-                    return StyleManager.Style;
-                }
-                if (StyleManager == null && metroStyle == MetroColorStyle.Default)
-                {
-                    return MetroDefaults.Style;
-                }
-
-                return metroStyle;
+                return DesignMode || metroStyle != MetroColorStyle.Default
+                    ? metroStyle
+                    : StyleManager != null && metroStyle == MetroColorStyle.Default
+                    ? StyleManager.Style
+                    : StyleManager == null && metroStyle == MetroColorStyle.Default ? MetroDefaults.Style : metroStyle;
             }
             set
             {
@@ -117,21 +101,11 @@ namespace MetroFramework.Controls
         {
             get
             {
-                if (DesignMode || metroTheme != MetroThemeStyle.Default)
-                {
-                    return metroTheme;
-                }
-
-                if (StyleManager != null && metroTheme == MetroThemeStyle.Default)
-                {
-                    return StyleManager.Theme;
-                }
-                if (StyleManager == null && metroTheme == MetroThemeStyle.Default)
-                {
-                    return MetroDefaults.Theme;
-                }
-
-                return metroTheme;
+                return DesignMode || metroTheme != MetroThemeStyle.Default
+                    ? metroTheme
+                    : StyleManager != null && metroTheme == MetroThemeStyle.Default
+                    ? StyleManager.Theme
+                    : StyleManager == null && metroTheme == MetroThemeStyle.Default ? MetroDefaults.Theme : metroTheme;
             }
             set
             {
@@ -141,32 +115,17 @@ namespace MetroFramework.Controls
             }
         }
 
-        private MetroStyleManager metroStyleManager = null;
         [Browsable(false)]
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public MetroStyleManager StyleManager
-        {
-            get { return metroStyleManager; }
-            set { metroStyleManager = value; }
-        }
+        public MetroStyleManager StyleManager { get; set; } = null;
 
-        private bool useCustomBackColor = false;
         [DefaultValue(false)]
         [Category(MetroDefaults.PropertyCategory.Appearance)]
-        public bool UseCustomBackColor
-        {
-            get { return useCustomBackColor; }
-            set { useCustomBackColor = value; }
-        }
+        public bool UseCustomBackColor { get; set; } = false;
 
-        private bool useCustomForeColor = false;
         [DefaultValue(false)]
         [Category(MetroDefaults.PropertyCategory.Appearance)]
-        public bool UseCustomForeColor
-        {
-            get { return useCustomForeColor; }
-            set { useCustomForeColor = value; }
-        }
+        public bool UseCustomForeColor { get; set; } = false;
 
         private bool useStyleColors = false;
         [DefaultValue(false)]
@@ -191,43 +150,37 @@ namespace MetroFramework.Controls
             set { SetStyle(ControlStyles.Selectable, value); }
         }
 
-private Image _image = null;
-[DefaultValue(null)]
-[Category(MetroDefaults.PropertyCategory.Appearance)]
-public virtual new Image Image
-{
-    get { return _image; }
-    set
-    {
-        _image = value;
-        createimages();
-    }
-}
+        private Image _image = null;
+        [DefaultValue(null)]
+        [Category(MetroDefaults.PropertyCategory.Appearance)]
+        public virtual new Image Image
+        {
+            get { return _image; }
+            set
+            {
+                _image = value;
+                CreateImages();
+            }
+        }
+
+        [DefaultValue(null)]
+        [Category(MetroDefaults.PropertyCategory.Appearance)]
+        public Image NoFocusImage { get; set; } = null;
 
 
-private Image _nofocus = null;
-[DefaultValue(null)]
-[Category(MetroDefaults.PropertyCategory.Appearance)]
-public Image NoFocusImage
-{
-    get { return _nofocus; }
-    set { _nofocus = value; }
-}
+        Int32 _imagesize = 16;
 
-
-Int32 _imagesize = 16;
-
-[DefaultValue(16)]
-[Category(MetroDefaults.PropertyCategory.Appearance)]
-public Int32 ImageSize
-{
-    get { return _imagesize; }
-    set
-    {
-        _imagesize = value;
-        Invalidate();
-    }
-}
+        [DefaultValue(16)]
+        [Category(MetroDefaults.PropertyCategory.Appearance)]
+        public Int32 ImageSize
+        {
+            get { return _imagesize; }
+            set
+            {
+                _imagesize = value;
+                Invalidate();
+            }
+        }
 
         public override string Text
         {
@@ -317,7 +270,7 @@ public Int32 ImageSize
             {
                 Color backColor = BackColor;
 
-                if (!useCustomBackColor)
+                if (!UseCustomBackColor)
                 {
                     backColor = MetroPaint.BackColor.Form(Theme);
                 }
@@ -360,7 +313,7 @@ public Int32 ImageSize
 
         protected virtual void OnPaintForeground(PaintEventArgs e)
         {
-            if (useCustomForeColor)
+            if (UseCustomForeColor)
                 foreColor = ForeColor;
             else
             {
@@ -369,165 +322,161 @@ public Int32 ImageSize
                     //foreColor = MetroPaint.ForeColor.Link.Hover(Theme);
                     foreColor = MetroPaint.ForeColor.Link.Normal(Theme);
                 }
-                else if (isHovered && isPressed && Enabled)
-                {
-                    foreColor = MetroPaint.ForeColor.Link.Press(Theme);
-                }
-                else if (!Enabled)
-                {
-                    foreColor = MetroPaint.ForeColor.Link.Disabled(Theme);
-                }
                 else
                 {
-                    foreColor = !useStyleColors ? MetroPaint.ForeColor.Link.Hover(Theme) : MetroPaint.GetStyleColor(Style);
+                    foreColor = isHovered && isPressed && Enabled
+                        ? MetroPaint.ForeColor.Link.Press(Theme)
+                        : !Enabled
+                                            ? MetroPaint.ForeColor.Link.Disabled(Theme)
+                                            : !useStyleColors ? MetroPaint.ForeColor.Link.Hover(Theme) : MetroPaint.GetStyleColor(Style);
                 }
             }
 
-            TextRenderer.DrawText(e.Graphics, Text, MetroFonts.Link(metroLinkSize, metroLinkWeight), ClientRectangle, foreColor, MetroPaint.GetTextFormatFlags(TextAlign, !this.AutoSize));
+            TextRenderer.DrawText(e.Graphics, Text, MetroFonts.Link(metroLinkSize, metroLinkWeight), ClientRectangle, foreColor, MetroPaint.GetTextFormatFlags(TextAlign, !AutoSize));
 
             OnCustomPaintForeground(new MetroPaintEventArgs(Color.Empty, foreColor, e.Graphics));
 
-            if (displayFocusRectangle && isFocused)
+            if (DisplayFocus && isFocused)
                 ControlPaint.DrawFocusRectangle(e.Graphics, ClientRectangle);
 
             if (_image != null) DrawIcon(e.Graphics);
         }
 
-private void DrawIcon(Graphics g)
-{
-    if (Image != null)
-    {
-        int _imgW = _imagesize;
-        int _imgH = _imagesize;
-
-        if (_imagesize == 0)
+        private void DrawIcon(Graphics g)
         {
-            _imgW = _image.Width;
-            _imgH = _image.Height;
-        }
-
-        Point iconLocation = new Point(2, (ClientRectangle.Height - _imagesize) / 2);
-        int _filler = 0;
-
-        switch (ImageAlign)
-        {
-            case ContentAlignment.BottomCenter:
-                iconLocation = new Point((ClientRectangle.Width - _imgW) / 2, (ClientRectangle.Height - _imgH) - _filler);
-                break;
-            case ContentAlignment.BottomLeft:
-                iconLocation = new Point(_filler, (ClientRectangle.Height - _imgH) - _filler);
-                break;
-            case ContentAlignment.BottomRight:
-                iconLocation = new Point((ClientRectangle.Width - _imgW) - _filler, (ClientRectangle.Height - _imgH) - _filler);
-                break;
-            case ContentAlignment.MiddleCenter:
-                iconLocation = new Point((ClientRectangle.Width - _imgW) / 2, (ClientRectangle.Height - _imgH) / 2);
-                break;
-            case ContentAlignment.MiddleLeft:
-                iconLocation = new Point(_filler, (ClientRectangle.Height - _imgH) / 2);
-                break;
-            case ContentAlignment.MiddleRight:
-                iconLocation = new Point((ClientRectangle.Width - _imgW) - _filler, (ClientRectangle.Height - _imgH) / 2);
-                break;
-            case ContentAlignment.TopCenter:
-                iconLocation = new Point((ClientRectangle.Width - _imgW) / 2, _filler);
-                break;
-            case ContentAlignment.TopLeft:
-                iconLocation = new Point(_filler, _filler);
-                break;
-            case ContentAlignment.TopRight:
-                iconLocation = new Point((ClientRectangle.Width - _imgW) - _filler, _filler);
-                break;
-        }
-
-        iconLocation.Y += 1;
-
-        if (_nofocus == null)
-        {
-            if (Theme == MetroThemeStyle.Dark)
+            if (Image != null)
             {
-                g.DrawImage((isHovered && !isPressed) ? _darkimg : _darklightimg, new Rectangle(iconLocation, new Size(_imgW, _imgH)));
-            }
-            else
-            {
-                g.DrawImage((isHovered && !isPressed) ? _lightimg : _lightlightimg, new Rectangle(iconLocation, new Size(_imgW, _imgH)));
+                int _imgW = _imagesize;
+                int _imgH = _imagesize;
+
+                if (_imagesize == 0)
+                {
+                    _imgW = _image.Width;
+                    _imgH = _image.Height;
+                }
+
+                Point iconLocation = new(2, (ClientRectangle.Height - _imagesize) / 2);
+                int _filler = 0;
+
+                switch (ImageAlign)
+                {
+                    case ContentAlignment.BottomCenter:
+                        iconLocation = new Point((ClientRectangle.Width - _imgW) / 2, ClientRectangle.Height - _imgH - _filler);
+                        break;
+                    case ContentAlignment.BottomLeft:
+                        iconLocation = new Point(_filler, ClientRectangle.Height - _imgH - _filler);
+                        break;
+                    case ContentAlignment.BottomRight:
+                        iconLocation = new Point(ClientRectangle.Width - _imgW - _filler, ClientRectangle.Height - _imgH - _filler);
+                        break;
+                    case ContentAlignment.MiddleCenter:
+                        iconLocation = new Point((ClientRectangle.Width - _imgW) / 2, (ClientRectangle.Height - _imgH) / 2);
+                        break;
+                    case ContentAlignment.MiddleLeft:
+                        iconLocation = new Point(_filler, (ClientRectangle.Height - _imgH) / 2);
+                        break;
+                    case ContentAlignment.MiddleRight:
+                        iconLocation = new Point(ClientRectangle.Width - _imgW - _filler, (ClientRectangle.Height - _imgH) / 2);
+                        break;
+                    case ContentAlignment.TopCenter:
+                        iconLocation = new Point((ClientRectangle.Width - _imgW) / 2, _filler);
+                        break;
+                    case ContentAlignment.TopLeft:
+                        iconLocation = new Point(_filler, _filler);
+                        break;
+                    case ContentAlignment.TopRight:
+                        iconLocation = new Point(ClientRectangle.Width - _imgW - _filler, _filler);
+                        break;
+                }
+
+                iconLocation.Y += 1;
+
+                if (NoFocusImage == null)
+                {
+                    if (Theme == MetroThemeStyle.Dark)
+                    {
+                        g.DrawImage((isHovered && !isPressed) ? _darkimg : _darklightimg, new Rectangle(iconLocation, new Size(_imgW, _imgH)));
+                    }
+                    else
+                    {
+                        g.DrawImage((isHovered && !isPressed) ? _lightimg : _lightlightimg, new Rectangle(iconLocation, new Size(_imgW, _imgH)));
+                    }
+                }
+                else
+                {
+                    if (Theme == MetroThemeStyle.Dark)
+                    {
+                        g.DrawImage((isHovered && !isPressed) ? _darkimg : NoFocusImage, new Rectangle(iconLocation, new Size(_imgW, _imgH)));
+                    }
+                    else
+                    {
+                        g.DrawImage((isHovered && !isPressed) ? _image : NoFocusImage, new Rectangle(iconLocation, new Size(_imgW, _imgH)));
+                    }
+                }
             }
         }
-        else
+
+        Image _lightlightimg = null;
+        Image _darklightimg = null;
+        Image _lightimg = null;
+        Image _darkimg = null;
+
+        private void CreateImages()
         {
-            if (Theme == MetroThemeStyle.Dark)
+            if (_image != null)
             {
-                g.DrawImage((isHovered && !isPressed) ? _darkimg : _nofocus, new Rectangle(iconLocation, new Size(_imgW, _imgH)));
+                _lightimg = _image;
+                _darkimg = ApplyInvert(new Bitmap(_image));
+
+                _darklightimg = ApplyLight(new Bitmap(_darkimg));
+                _lightlightimg = ApplyLight(new Bitmap(_lightimg));
             }
-            else
+        }
+        public Bitmap ApplyInvert(Bitmap bitmapImage)
+        {
+            byte A, R, G, B;
+            Color pixelColor;
+
+            for (int y = 0; y < bitmapImage.Height; y++)
             {
-                g.DrawImage((isHovered && !isPressed) ? _image : _nofocus, new Rectangle(iconLocation, new Size(_imgW, _imgH)));
+                for (int x = 0; x < bitmapImage.Width; x++)
+                {
+                    pixelColor = bitmapImage.GetPixel(x, y);
+                    A = pixelColor.A;
+                    R = (byte)(255 - pixelColor.R);
+                    G = (byte)(255 - pixelColor.G);
+                    B = (byte)(255 - pixelColor.B);
+                    bitmapImage.SetPixel(x, y, Color.FromArgb((int)A, (int)R, (int)G, (int)B));
+                }
             }
+
+            return bitmapImage;
         }
-    }
-}
 
-Image _lightlightimg = null;
-Image _darklightimg = null;
-Image _lightimg = null;
-Image _darkimg = null;
-
-private void createimages()
-{
-    if (_image != null)
-    {
-        _lightimg = _image;
-        _darkimg = ApplyInvert(new Bitmap(_image));
-
-        _darklightimg = ApplyLight(new Bitmap(_darkimg));
-        _lightlightimg = ApplyLight(new Bitmap(_lightimg));
-    }
-}
-public Bitmap ApplyInvert(Bitmap bitmapImage)
-{
-    byte A, R, G, B;
-    Color pixelColor;
-
-    for (int y = 0; y < bitmapImage.Height; y++)
-    {
-        for (int x = 0; x < bitmapImage.Width; x++)
+        public Bitmap ApplyLight(Bitmap bitmapImage)
         {
-            pixelColor = bitmapImage.GetPixel(x, y);
-            A = pixelColor.A;
-            R = (byte)(255 - pixelColor.R);
-            G = (byte)(255 - pixelColor.G);
-            B = (byte)(255 - pixelColor.B);
-            bitmapImage.SetPixel(x, y, Color.FromArgb((int)A, (int)R, (int)G, (int)B));
+            byte A, R, G, B;
+            Color pixelColor;
+
+            for (int y = 0; y < bitmapImage.Height; y++)
+            {
+                for (int x = 0; x < bitmapImage.Width; x++)
+                {
+                    pixelColor = bitmapImage.GetPixel(x, y);
+
+                    A = pixelColor.A;
+                    if (pixelColor.A is <= 255 and >= 100)
+                    { A = 90; }
+
+                    R = (byte)pixelColor.R;
+                    G = (byte)pixelColor.G;
+                    B = (byte)pixelColor.B;
+                    bitmapImage.SetPixel(x, y, Color.FromArgb((int)A, (int)R, (int)G, (int)B));
+                }
+            }
+
+            return bitmapImage;
         }
-    }
-
-    return bitmapImage;
-}
-
-public Bitmap ApplyLight(Bitmap bitmapImage)
-{
-    byte A, R, G, B;
-    Color pixelColor;
-
-    for (int y = 0; y < bitmapImage.Height; y++)
-    {
-        for (int x = 0; x < bitmapImage.Width; x++)
-        {
-            pixelColor = bitmapImage.GetPixel(x, y);
-
-            A = pixelColor.A;
-            if (pixelColor.A <= 255 && pixelColor.A >= 100)
-            { A = 90; }
-
-            R = (byte)(pixelColor.R);
-            G = (byte)(pixelColor.G);
-            B = (byte)(pixelColor.B);
-            bitmapImage.SetPixel(x, y, Color.FromArgb((int)A, (int)R, (int)G, (int)B));
-        }
-    }
-
-    return bitmapImage;
-}
         #endregion
 
         #region Focus Methods
@@ -619,8 +568,8 @@ public Bitmap ApplyLight(Bitmap bitmapImage)
                 isPressed = true;
                 Invalidate();
 
-                if (Name == "lnkClear" && Parent.GetType().Name == "MetroTextBox") this.PerformClick();
-                if (Name == "lnkClear" && Parent.GetType().Name == "SearchControl") this.PerformClick();
+                if (Name == "lnkClear" && Parent.GetType().Name == "MetroTextBox") PerformClick();
+                if (Name == "lnkClear" && Parent.GetType().Name == "SearchControl") PerformClick();
             }
 
             base.OnMouseDown(e);

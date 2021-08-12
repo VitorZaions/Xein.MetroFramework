@@ -1,21 +1,16 @@
 ﻿using MetroFramework.Controls;
-using MetroFramework.Drawing;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Drawing;
-using System.Data;
-using System.Diagnostics;
-using System.Text;
-using System.Windows.Forms;
-using MetroFramework.Forms;
 using MetroFramework.Localization;
+
+using System;
+using System.Diagnostics;
+using System.Drawing;
+using System.Windows.Forms;
 
 namespace MetroFramework
 {
     public partial class MetroMessageBoxControl : Form
     {
-        private MetroLocalize metroLocalize = null;
+        private readonly MetroLocalize metroLocalize = null;
 
         public MetroMessageBoxControl()
         {
@@ -35,30 +30,27 @@ namespace MetroFramework
         }
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        private Color _defaultColor = Color.FromArgb(57, 179, 215);
+        private readonly Color _defaultColor = Color.FromArgb(57, 179, 215);
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        private Color _errorColor = Color.FromArgb(210, 50, 45);
+        private readonly Color _errorColor = Color.FromArgb(210, 50, 45);
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        private Color _warningColor = Color.FromArgb(237, 156, 40);
+        private readonly Color _warningColor = Color.FromArgb(237, 156, 40);
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        private Color _success = Color.FromArgb(71, 164, 71);
+        private readonly Color _success = Color.FromArgb(71, 164, 71);
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        private Color _question = Color.FromArgb(71, 164, 71);
+        private readonly Color _question = Color.FromArgb(71, 164, 71);
 
         /// <summary>
         /// Gets the top body section of the control. 
         /// </summary>
-        public Panel Body
-        {
-            get { return panelbody; }
-        }
+        public Panel Body { get; private set; }
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        private MetroMessageBoxProperties _properties = null;
+        private readonly MetroMessageBoxProperties _properties = null;
 
         /// <summary>
         /// Gets the message box display properties.
@@ -88,10 +80,10 @@ namespace MetroFramework
             switch (_properties.Icon)
             {
                 case MessageBoxIcon.Exclamation:
-                    panelbody.BackColor = _warningColor;
+                    Body.BackColor = _warningColor;
                     break;
                 case MessageBoxIcon.Error:
-                    panelbody.BackColor = _errorColor;
+                    Body.BackColor = _errorColor;
                     break;
                 default: break;
             }
@@ -187,23 +179,17 @@ namespace MetroFramework
                     metroButton3.Tag = DialogResult.Ignore;
 
                     break;
-                default : break;
+                default: break;
             }
 
-            switch (_properties.Icon)
+            Body.BackColor = _properties.Icon switch
             {
-                case  MessageBoxIcon.Error:
-                    panelbody.BackColor = _errorColor; break;
-                case MessageBoxIcon.Warning:
-                    panelbody.BackColor = _warningColor; break;
-                case MessageBoxIcon.Information:
-                    panelbody.BackColor = _defaultColor;                    
-                     break;
-                case MessageBoxIcon.Question:
-                    panelbody.BackColor = _question; break;
-                default:
-                    panelbody.BackColor = Color.DarkGray; break;
-            }
+                MessageBoxIcon.Error => _errorColor,
+                MessageBoxIcon.Warning => _warningColor,
+                MessageBoxIcon.Information => _defaultColor,
+                MessageBoxIcon.Question => _question,
+                _ => Color.DarkGray,
+            };
         }
 
         private void EnableButton(MetroButton button)
@@ -238,7 +224,7 @@ namespace MetroFramework
                     {
                         if (metroButton3.Enabled) metroButton3.Focus();
                     }
-                    break;  
+                    break;
                 default: break;
             }
         }
@@ -266,7 +252,7 @@ namespace MetroFramework
 
             button.MouseClick -= button_MouseClick;
             button.MouseClick += button_MouseClick;
-            
+
             button.MouseEnter -= button_MouseEnter;
             button.MouseEnter += button_MouseEnter;
 
@@ -293,7 +279,7 @@ namespace MetroFramework
             MetroButton button = (MetroButton)sender;
             if (!button.Enabled) return;
             _result = (DialogResult)button.Tag;
-            Hide(); 
+            Hide();
         }
 
     }

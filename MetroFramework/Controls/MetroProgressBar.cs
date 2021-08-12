@@ -21,14 +21,14 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE 
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+using MetroFramework.Components;
+using MetroFramework.Drawing;
+using MetroFramework.Interfaces;
+
 using System;
 using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
-
-using MetroFramework.Components;
-using MetroFramework.Drawing;
-using MetroFramework.Interfaces;
 
 namespace MetroFramework.Controls
 {
@@ -75,21 +75,11 @@ namespace MetroFramework.Controls
         {
             get
             {
-                if (DesignMode || metroStyle != MetroColorStyle.Default)
-                {
-                    return metroStyle;
-                }
-
-                if (StyleManager != null && metroStyle == MetroColorStyle.Default)
-                {
-                    return StyleManager.Style;
-                }
-                if (StyleManager == null && metroStyle == MetroColorStyle.Default)
-                {
-                    return MetroDefaults.Style;
-                }
-
-                return metroStyle;
+                return DesignMode || metroStyle != MetroColorStyle.Default
+                    ? metroStyle
+                    : StyleManager != null && metroStyle == MetroColorStyle.Default
+                    ? StyleManager.Style
+                    : StyleManager == null && metroStyle == MetroColorStyle.Default ? MetroDefaults.Style : metroStyle;
             }
             set { metroStyle = value; }
         }
@@ -101,64 +91,34 @@ namespace MetroFramework.Controls
         {
             get
             {
-                if (DesignMode || metroTheme != MetroThemeStyle.Default)
-                {
-                    return metroTheme;
-                }
-
-                if (StyleManager != null && metroTheme == MetroThemeStyle.Default)
-                {
-                    return StyleManager.Theme;
-                }
-                if (StyleManager == null && metroTheme == MetroThemeStyle.Default)
-                {
-                    return MetroDefaults.Theme;
-                }
-
-                return metroTheme;
+                return DesignMode || metroTheme != MetroThemeStyle.Default
+                    ? metroTheme
+                    : StyleManager != null && metroTheme == MetroThemeStyle.Default
+                    ? StyleManager.Theme
+                    : StyleManager == null && metroTheme == MetroThemeStyle.Default ? MetroDefaults.Theme : metroTheme;
             }
             set { metroTheme = value; }
         }
 
-        private MetroStyleManager metroStyleManager = null;
         [Browsable(false)]
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public MetroStyleManager StyleManager
-        {
-            get { return metroStyleManager; }
-            set { metroStyleManager = value; }
-        }
+        public MetroStyleManager StyleManager { get; set; } = null;
 
-        private bool useCustomBackColor = false;
         [DefaultValue(false)]
         [Category(MetroDefaults.PropertyCategory.Appearance)]
-        public bool UseCustomBackColor
-        {
-            get { return useCustomBackColor; }
-            set { useCustomBackColor = value; }
-        }
+        public bool UseCustomBackColor { get; set; } = false;
 
-        private bool useCustomForeColor = false;
         [Browsable(false)]
         [DefaultValue(false)]
         [Category(MetroDefaults.PropertyCategory.Appearance)]
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public bool UseCustomForeColor
-        {
-            get { return useCustomForeColor; }
-            set { useCustomForeColor = value; }
-        }
+        public bool UseCustomForeColor { get; set; } = false;
 
-        private bool useStyleColors = true;
         [Browsable(false)]
         [DefaultValue(true)]
         [Category(MetroDefaults.PropertyCategory.Appearance)]
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public bool UseStyleColors
-        {
-            get { return useStyleColors; }
-            set { useStyleColors = value; }
-        }
+        public bool UseStyleColors { get; set; } = true;
 
         [Browsable(false)]
         [Category(MetroDefaults.PropertyCategory.Behaviour)]
@@ -173,50 +133,25 @@ namespace MetroFramework.Controls
 
         #region Fields
 
-        private MetroProgressBarSize metroLabelSize = MetroProgressBarSize.Medium;
         [DefaultValue(MetroProgressBarSize.Medium)]
         [Category(MetroDefaults.PropertyCategory.Appearance)]
-        public MetroProgressBarSize FontSize
-        {
-            get { return metroLabelSize; }
-            set { metroLabelSize = value; }
-        }
+        public MetroProgressBarSize FontSize { get; set; } = MetroProgressBarSize.Medium;
 
-        private MetroProgressBarWeight metroLabelWeight = MetroProgressBarWeight.Light;
         [DefaultValue(MetroProgressBarWeight.Light)]
         [Category(MetroDefaults.PropertyCategory.Appearance)]
-        public MetroProgressBarWeight FontWeight
-        {
-            get { return metroLabelWeight; }
-            set { metroLabelWeight = value; }
-        }
+        public MetroProgressBarWeight FontWeight { get; set; } = MetroProgressBarWeight.Light;
 
-        private ContentAlignment textAlign = ContentAlignment.MiddleRight;
         [DefaultValue(ContentAlignment.MiddleRight)]
         [Category(MetroDefaults.PropertyCategory.Appearance)]
-        public ContentAlignment TextAlign
-        {
-            get { return textAlign; }
-            set { textAlign = value; }
-        }
+        public ContentAlignment TextAlign { get; set; } = ContentAlignment.MiddleRight;
 
-        private bool hideProgressText = true;
         [DefaultValue(true)]
         [Category(MetroDefaults.PropertyCategory.Appearance)]
-        public bool HideProgressText
-        {
-            get { return hideProgressText; }
-            set { hideProgressText = value; }
-        }
+        public bool HideProgressText { get; set; } = true;
 
-        private ProgressBarStyle progressBarStyle = ProgressBarStyle.Continuous;
         [DefaultValue(ProgressBarStyle.Continuous)]
         [Category(MetroDefaults.PropertyCategory.Appearance)]
-        public ProgressBarStyle ProgressBarStyle
-        {
-            get { return progressBarStyle; }
-            set { progressBarStyle = value; }
-        }
+        public ProgressBarStyle ProgressBarStyle { get; set; } = ProgressBarStyle.Continuous;
 
         public new int Value
         {
@@ -227,29 +162,29 @@ namespace MetroFramework.Controls
         [Browsable(false)]
         public double ProgressTotalPercent
         {
-            get { return ((1 - (double)(Maximum - Value) / Maximum) * 100); }
+            get { return (1 - ((double)(Maximum - Value) / Maximum)) * 100; }
         }
 
         [Browsable(false)]
         public double ProgressTotalValue
         {
-            get { return (1 - (double)(Maximum - Value) / Maximum); }
+            get { return 1 - ((double)(Maximum - Value) / Maximum); }
         }
 
         [Browsable(false)]
         public string ProgressPercentText
         {
-            get { return (string.Format("{0}%", Math.Round(ProgressTotalPercent))); }
+            get { return string.Format("{0}%", Math.Round(ProgressTotalPercent)); }
         }
 
         private double ProgressBarWidth
         {
-            get { return (((double)Value / Maximum) * ClientRectangle.Width); }
+            get { return (double)Value / Maximum * ClientRectangle.Width; }
         }
 
         private int ProgressBarMarqueeWidth
         {
-            get { return (ClientRectangle.Width / 3); }
+            get { return ClientRectangle.Width / 3; }
         }
 
         #endregion
@@ -274,17 +209,10 @@ namespace MetroFramework.Controls
             {
                 Color backColor = BackColor;
 
-                if (!useCustomBackColor)
+                if (!UseCustomBackColor)
                 {
-                    if (!Enabled)
-                    {
-                        backColor = MetroPaint.BackColor.ProgressBar.Bar.Disabled(Theme);
-                    }
-                    else
-                    {
-                        backColor = MetroPaint.BackColor.ProgressBar.Bar.Normal(Theme);
-                    }
-                }                
+                    backColor = !Enabled ? MetroPaint.BackColor.ProgressBar.Bar.Disabled(Theme) : MetroPaint.BackColor.ProgressBar.Bar.Normal(Theme);
+                }
 
                 if (backColor.A == 255)
                 {
@@ -322,19 +250,19 @@ namespace MetroFramework.Controls
 
         protected virtual void OnPaintForeground(PaintEventArgs e)
         {
-            if (progressBarStyle == ProgressBarStyle.Continuous)
+            if (ProgressBarStyle == ProgressBarStyle.Continuous)
             {
                 if (!DesignMode) StopTimer();
 
                 DrawProgressContinuous(e.Graphics);
             }
-            else if (progressBarStyle == ProgressBarStyle.Blocks)
+            else if (ProgressBarStyle == ProgressBarStyle.Blocks)
             {
                 if (!DesignMode) StopTimer();
 
                 DrawProgressContinuous(e.Graphics);
             }
-            else if (progressBarStyle == ProgressBarStyle.Marquee)
+            else if (ProgressBarStyle == ProgressBarStyle.Marquee)
             {
                 if (!DesignMode && Enabled) StartTimer();
                 if (!Enabled) StopTimer();
@@ -352,9 +280,9 @@ namespace MetroFramework.Controls
 
             DrawProgressText(e.Graphics);
 
-            using (Pen p = new Pen(MetroPaint.BorderColor.ProgressBar.Normal(Theme)))
+            using (Pen p = new(MetroPaint.BorderColor.ProgressBar.Normal(Theme)))
             {
-                Rectangle borderRect = new Rectangle(0, 0, Width - 1, Height - 1);
+                Rectangle borderRect = new(0, 0, Width - 1, Height - 1);
                 e.Graphics.DrawRectangle(p, borderRect);
             }
 
@@ -377,18 +305,8 @@ namespace MetroFramework.Controls
         {
             if (HideProgressText) return;
 
-            Color foreColor;
-
-            if (!Enabled)
-            {
-                foreColor = MetroPaint.ForeColor.ProgressBar.Disabled(Theme);
-            }
-            else
-            {
-                foreColor = MetroPaint.ForeColor.ProgressBar.Normal(Theme);
-            }
-           
-            TextRenderer.DrawText(graphics, ProgressPercentText, MetroFonts.ProgressBar(metroLabelSize, metroLabelWeight), ClientRectangle, foreColor, MetroPaint.GetTextFormatFlags(TextAlign));
+            Color foreColor = !Enabled ? MetroPaint.ForeColor.ProgressBar.Disabled(Theme) : MetroPaint.ForeColor.ProgressBar.Normal(Theme);
+            TextRenderer.DrawText(graphics, ProgressPercentText, MetroFonts.ProgressBar(FontSize, FontWeight), ClientRectangle, foreColor, MetroPaint.GetTextFormatFlags(TextAlign));
         }
 
         #endregion
@@ -403,7 +321,7 @@ namespace MetroFramework.Controls
             using (var g = CreateGraphics())
             {
                 proposedSize = new Size(int.MaxValue, int.MaxValue);
-                preferredSize = TextRenderer.MeasureText(g, ProgressPercentText, MetroFonts.ProgressBar(metroLabelSize, metroLabelWeight), proposedSize, MetroPaint.GetTextFormatFlags(TextAlign));
+                preferredSize = TextRenderer.MeasureText(g, ProgressPercentText, MetroFonts.ProgressBar(FontSize, FontWeight), proposedSize, MetroPaint.GetTextFormatFlags(TextAlign));
             }
 
             return preferredSize;
@@ -414,7 +332,7 @@ namespace MetroFramework.Controls
         #region Private Methods
 
         private Timer marqueeTimer;
-        private bool marqueeTimerEnabled
+        private bool MarqueeTimerEnabled
         {
             get
             {
@@ -424,16 +342,16 @@ namespace MetroFramework.Controls
 
         private void StartTimer()
         {
-            if (marqueeTimerEnabled) return;
+            if (MarqueeTimerEnabled) return;
 
             if (marqueeTimer == null)
             {
-                marqueeTimer = new Timer {Interval = 10};
-                marqueeTimer.Tick += marqueeTimer_Tick;
+                marqueeTimer = new Timer { Interval = 10 };
+                marqueeTimer.Tick += MarqueeTimer_Tick;
             }
 
             marqueeX = -ProgressBarMarqueeWidth;
-    
+
             marqueeTimer.Stop();
             marqueeTimer.Start();
 
@@ -450,7 +368,7 @@ namespace MetroFramework.Controls
             Invalidate();
         }
 
-        private void marqueeTimer_Tick(object sender, EventArgs e)
+        private void MarqueeTimer_Tick(object sender, EventArgs e)
         {
             marqueeX++;
 

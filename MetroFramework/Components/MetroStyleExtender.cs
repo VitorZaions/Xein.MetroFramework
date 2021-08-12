@@ -1,19 +1,17 @@
-﻿using System;
-using System.Collections;
+﻿using MetroFramework.Drawing;
+using MetroFramework.Interfaces;
+
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.Drawing;
 using System.Windows.Forms;
 
-using MetroFramework.Drawing;
-using MetroFramework.Interfaces;
-
 namespace MetroFramework.Components
 {
-	[ProvideProperty("ApplyMetroTheme", typeof(Control))]
+    [ProvideProperty("ApplyMetroTheme", typeof(Control))]
     public sealed class MetroStyleExtender : Component, IExtenderProvider, IMetroComponent
-	{
+    {
         #region Interface
 
         [Browsable(false)]
@@ -29,26 +27,11 @@ namespace MetroFramework.Components
         [DefaultValue(MetroThemeStyle.Default)]
         public MetroThemeStyle Theme
         {
-            get
+            get => DesignMode || metroTheme != MetroThemeStyle.Default
+                    ? metroTheme : StyleManager != null && metroTheme == MetroThemeStyle.Default
+                    ? StyleManager.Theme : StyleManager == null && metroTheme == MetroThemeStyle.Default ? MetroDefaults.Theme : metroTheme;
+            set
             {
-                if (DesignMode || metroTheme != MetroThemeStyle.Default)
-                {
-                    return metroTheme;
-                }
-
-                if (StyleManager != null && metroTheme == MetroThemeStyle.Default)
-                {
-                    return StyleManager.Theme;
-                }
-                if (StyleManager == null && metroTheme == MetroThemeStyle.Default)
-                {
-                    return MetroDefaults.Theme;
-                }
-
-                return metroTheme;
-            }
-            set 
-            { 
                 metroTheme = value;
                 UpdateTheme();
             }
@@ -60,8 +43,8 @@ namespace MetroFramework.Components
         public MetroStyleManager StyleManager
         {
             get { return metroStyleManager; }
-            set 
-            { 
+            set
+            {
                 metroStyleManager = value;
                 UpdateTheme();
             }
@@ -71,7 +54,7 @@ namespace MetroFramework.Components
 
         #region Fields
 
-        private readonly List<Control> extendedControls = new List<Control>();
+        private readonly List<Control> extendedControls = new();
 
         #endregion
 
@@ -79,7 +62,7 @@ namespace MetroFramework.Components
 
         public MetroStyleExtender()
         {
-        
+
         }
 
         public MetroStyleExtender(IContainer parent)
@@ -124,17 +107,17 @@ namespace MetroFramework.Components
         #region IExtenderProvider
 
         bool IExtenderProvider.CanExtend(object target)
-		{
-		    return target is Control && !(target is IMetroControl || target is IMetroForm);
-		}
+        {
+            return target is Control and not (IMetroControl or IMetroForm);
+        }
 
         [DefaultValue(false)]
         [Category(MetroDefaults.PropertyCategory.Appearance)]
         [Description("Apply Metro Theme BackColor and ForeColor.")]
         public bool GetApplyMetroTheme(Control control)
-		{
-		    return control != null && extendedControls.Contains(control);
-		}
+        {
+            return control != null && extendedControls.Contains(control);
+        }
 
         public void SetApplyMetroTheme(Control control, bool value)
         {

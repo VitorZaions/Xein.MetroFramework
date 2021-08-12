@@ -1,12 +1,8 @@
 using System;
-using System.Collections.Generic;
 using System.Drawing;
 using System.Media;
-using System.Text;
 using System.Threading;
 using System.Windows.Forms;
-using MetroFramework.Forms;
-using MetroFramework.Interfaces;
 
 namespace MetroFramework
 {
@@ -32,7 +28,7 @@ namespace MetroFramework
         /// <param name="message"></param>
         /// <param name="height" optional=211></param>
         /// <returns></returns>
-        public static DialogResult Show(IWin32Window owner, String message,int height)
+        public static DialogResult Show(IWin32Window owner, String message, int height)
         { return Show(owner, message, "Notification", height); }
 
         /// <summary>
@@ -107,7 +103,7 @@ namespace MetroFramework
         public static DialogResult Show(IWin32Window owner, String message, String title, MessageBoxButtons buttons, MessageBoxIcon icon, int height)
         { return Show(owner, message, title, buttons, icon, MessageBoxDefaultButton.Button1, height); }
 
-           /// <summary>
+        /// <summary>
         /// Shows a metro-styles message notification into the specified owner window.
         /// </summary>
         /// <param name="owner"></param>
@@ -141,7 +137,7 @@ namespace MetroFramework
             if (owner != null)
             {
                 Form _owner = (owner as Form == null) ? ((UserControl)owner).ParentForm : (Form)owner;
-                
+
                 //int _minWidth = 500;
                 //int _minHeight = 350;
 
@@ -174,7 +170,7 @@ namespace MetroFramework
                         SystemSounds.Asterisk.Play(); break;
                 }
 
-                MetroMessageBoxControl _control = new MetroMessageBoxControl();
+                MetroMessageBoxControl _control = new();
                 _control.BackColor = _owner.BackColor;
                 _control.Properties.Buttons = buttons;
                 _control.Properties.DefaultButton = defaultbutton;
@@ -197,7 +193,7 @@ namespace MetroFramework
                 //}
 
                 _control.Size = new Size(_owner.Size.Width, height);
-                _control.Location = new Point(_owner.Location.X, _owner.Location.Y + (_owner.Height - _control.Height) / 2);
+                _control.Location = new Point(_owner.Location.X, _owner.Location.Y + ((_owner.Height - _control.Height) / 2));
                 _control.ArrangeApperance();
                 int _overlaySizes = Convert.ToInt32(Math.Floor(_control.Size.Height * 0.28));
                 //_control.OverlayPanelTop.Size = new Size(_control.Size.Width, _overlaySizes - 30);
@@ -207,7 +203,7 @@ namespace MetroFramework
                 _control.BringToFront();
                 _control.SetDefaultButton();
 
-                Action<MetroMessageBoxControl> _delegate = new Action<MetroMessageBoxControl>(ModalState);
+                Action<MetroMessageBoxControl> _delegate = new(ModalState);
                 IAsyncResult _asyncresult = _delegate.BeginInvoke(_control, null, _delegate);
                 bool _cancelled = false;
 
@@ -216,7 +212,7 @@ namespace MetroFramework
                     while (!_asyncresult.IsCompleted)
                     { Thread.Sleep(1); Application.DoEvents(); }
                 }
-                catch 
+                catch
                 {
                     _cancelled = true;
 
@@ -235,7 +231,7 @@ namespace MetroFramework
                     //_owner.Controls.Remove(_control);
                     _control.Dispose(); _control = null;
                 }
-                 
+
             }
 
             return _result;

@@ -21,14 +21,14 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE 
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-using System.Drawing;
 using System.Collections.Generic;
+using System.Drawing;
 
 namespace MetroFramework
 {
     public sealed class MetroPens
     {
-        private static Dictionary<string, Pen> metroPens = new Dictionary<string ,Pen>();
+        private static readonly Dictionary<string, Pen> metroPens = new();
         private static Pen GetSavePen(string key, Color color)
         {
             lock (metroPens)

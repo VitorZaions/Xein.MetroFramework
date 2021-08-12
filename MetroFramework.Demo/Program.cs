@@ -11,7 +11,7 @@ namespace MetroFramework.Demo
         [STAThread]
         static void Main()
         {
-            System.Globalization.CultureInfo cultureInfo = new System.Globalization.CultureInfo("de-DE");
+            System.Globalization.CultureInfo cultureInfo = new("de-DE");
             Application.CurrentCulture = cultureInfo;
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);

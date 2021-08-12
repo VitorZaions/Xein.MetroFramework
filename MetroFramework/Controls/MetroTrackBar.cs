@@ -21,14 +21,14 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE 
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-using System;
-using System.Drawing;
-using System.ComponentModel;
-using System.Windows.Forms;
-
-using MetroFramework.Drawing;
 using MetroFramework.Components;
+using MetroFramework.Drawing;
 using MetroFramework.Interfaces;
+
+using System;
+using System.ComponentModel;
+using System.Drawing;
+using System.Windows.Forms;
 
 namespace MetroFramework.Controls
 {
@@ -75,21 +75,11 @@ namespace MetroFramework.Controls
         {
             get
             {
-                if (DesignMode || metroStyle != MetroColorStyle.Default)
-                {
-                    return metroStyle;
-                }
-
-                if (StyleManager != null && metroStyle == MetroColorStyle.Default)
-                {
-                    return StyleManager.Style;
-                }
-                if (StyleManager == null && metroStyle == MetroColorStyle.Default)
-                {
-                    return MetroDefaults.Style;
-                }
-
-                return metroStyle;
+                return DesignMode || metroStyle != MetroColorStyle.Default
+                    ? metroStyle
+                    : StyleManager != null && metroStyle == MetroColorStyle.Default
+                    ? StyleManager.Style
+                    : StyleManager == null && metroStyle == MetroColorStyle.Default ? MetroDefaults.Style : metroStyle;
             }
             set { metroStyle = value; }
         }
@@ -101,64 +91,34 @@ namespace MetroFramework.Controls
         {
             get
             {
-                if (DesignMode || metroTheme != MetroThemeStyle.Default)
-                {
-                    return metroTheme;
-                }
-
-                if (StyleManager != null && metroTheme == MetroThemeStyle.Default)
-                {
-                    return StyleManager.Theme;
-                }
-                if (StyleManager == null && metroTheme == MetroThemeStyle.Default)
-                {
-                    return MetroDefaults.Theme;
-                }
-
-                return metroTheme;
+                return DesignMode || metroTheme != MetroThemeStyle.Default
+                    ? metroTheme
+                    : StyleManager != null && metroTheme == MetroThemeStyle.Default
+                    ? StyleManager.Theme
+                    : StyleManager == null && metroTheme == MetroThemeStyle.Default ? MetroDefaults.Theme : metroTheme;
             }
             set { metroTheme = value; }
         }
 
-        private MetroStyleManager metroStyleManager = null;
         [Browsable(false)]
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public MetroStyleManager StyleManager
-        {
-            get { return metroStyleManager; }
-            set { metroStyleManager = value; }
-        }
+        public MetroStyleManager StyleManager { get; set; } = null;
 
-        private bool useCustomBackColor = false;
         [DefaultValue(false)]
         [Category(MetroDefaults.PropertyCategory.Appearance)]
-        public bool UseCustomBackColor
-        {
-            get { return useCustomBackColor; }
-            set { useCustomBackColor = value; }
-        }
+        public bool UseCustomBackColor { get; set; } = false;
 
-        private bool useCustomForeColor = false;
         [Browsable(false)]
         [DefaultValue(false)]
         [Category(MetroDefaults.PropertyCategory.Appearance)]
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public bool UseCustomForeColor
-        {
-            get { return useCustomForeColor; }
-            set { useCustomForeColor = value; }
-        }
+        public bool UseCustomForeColor { get; set; } = false;
 
-        private bool useStyleColors = false;
         [Browsable(false)]
         [DefaultValue(false)]
         [Category(MetroDefaults.PropertyCategory.Appearance)]
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public bool UseStyleColors
-        {
-            get { return useStyleColors; }
-            set { useStyleColors = value; }
-        }
+        public bool UseStyleColors { get; set; } = false;
 
         [Browsable(false)]
         [Category(MetroDefaults.PropertyCategory.Behaviour)]
@@ -176,15 +136,13 @@ namespace MetroFramework.Controls
         public event EventHandler ValueChanged;
         private void OnValueChanged()
         {
-            if (ValueChanged != null)
-                ValueChanged(this, EventArgs.Empty);
+            ValueChanged?.Invoke(this, EventArgs.Empty);
         }
 
         public event ScrollEventHandler Scroll;
         private void OnScroll(ScrollEventType scrollType, int newValue)
         {
-            if (Scroll != null)
-                Scroll(this, new ScrollEventArgs(scrollType, newValue));
+            Scroll?.Invoke(this, new ScrollEventArgs(scrollType, newValue));
         }
 
 
@@ -192,14 +150,9 @@ namespace MetroFramework.Controls
 
         #region Fields
 
-        private bool displayFocusRectangle = false;
         [DefaultValue(false)]
         [Category(MetroDefaults.PropertyCategory.Appearance)]
-        public bool DisplayFocus
-        {
-            get { return displayFocusRectangle; }
-            set { displayFocusRectangle = value; }
-        }
+        public bool DisplayFocus { get; set; } = false;
 
         private int trackerValue = 50;
         [DefaultValue(50)]
@@ -214,7 +167,7 @@ namespace MetroFramework.Controls
                     OnValueChanged();
                     Invalidate();
                 }
-                else throw new ArgumentOutOfRangeException("Value is outside appropriate range (min, max)");
+                else throw new ArgumentOutOfRangeException(nameof(Value), "Value is outside appropriate range (min, max)");
             }
         }
 
@@ -231,11 +184,11 @@ namespace MetroFramework.Controls
                     if (trackerValue < barMinimum)
                     {
                         trackerValue = barMinimum;
-                        if (ValueChanged != null) ValueChanged(this, new EventArgs());
+                        ValueChanged?.Invoke(this, new EventArgs());
                     }
                     Invalidate();
                 }
-                else throw new ArgumentOutOfRangeException("Minimal value is greather than maximal one");
+                else throw new ArgumentOutOfRangeException(nameof(Minimum), "Minimal value is greather than maximal one");
             }
         }
 
@@ -253,29 +206,19 @@ namespace MetroFramework.Controls
                     if (trackerValue > barMaximum)
                     {
                         trackerValue = barMaximum;
-                        if (ValueChanged != null) ValueChanged(this, new EventArgs());
+                        ValueChanged?.Invoke(this, new EventArgs());
                     }
                     Invalidate();
                 }
-                else throw new ArgumentOutOfRangeException("Maximal value is lower than minimal one");
+                else throw new ArgumentOutOfRangeException(nameof(Maximum), "Maximal value is lower than minimal one");
             }
         }
 
-        private int smallChange = 1;
         [DefaultValue(1)]
-        public int SmallChange
-        {
-            get { return smallChange; }
-            set { smallChange = value; }
-        }
+        public int SmallChange { get; set; } = 1;
 
-        private int largeChange = 5;
         [DefaultValue(5)]
-        public int LargeChange
-        {
-            get { return largeChange; }
-            set { largeChange = value; }
-        }
+        public int LargeChange { get; set; } = 5;
 
         private int mouseWheelBarPartitions = 10;
         [DefaultValue(10)]
@@ -284,9 +227,7 @@ namespace MetroFramework.Controls
             get { return mouseWheelBarPartitions; }
             set
             {
-                if (value > 0)
-                    mouseWheelBarPartitions = value;
-                else throw new ArgumentOutOfRangeException("MouseWheelBarPartitions has to be greather than zero");
+                mouseWheelBarPartitions = value > 0 ? value : throw new ArgumentOutOfRangeException(nameof(MouseWheelBarPartitions), "MouseWheelBarPartitions has to be greather than zero");
             }
         }
 
@@ -300,11 +241,11 @@ namespace MetroFramework.Controls
 
         public MetroTrackBar(int min, int max, int value)
         {
-            SetStyle(ControlStyles.AllPaintingInWmPaint | 
+            SetStyle(ControlStyles.AllPaintingInWmPaint |
                      ControlStyles.OptimizedDoubleBuffer |
-                     ControlStyles.ResizeRedraw | 
+                     ControlStyles.ResizeRedraw |
                      ControlStyles.Selectable |
-                     ControlStyles.SupportsTransparentBackColor | 
+                     ControlStyles.SupportsTransparentBackColor |
                      ControlStyles.UserMouse |
                      ControlStyles.UserPaint, true);
 
@@ -327,7 +268,7 @@ namespace MetroFramework.Controls
             {
                 Color backColor = BackColor;
 
-                if (!useCustomBackColor)
+                if (!UseCustomBackColor)
                 {
                     backColor = MetroPaint.BackColor.Form(Theme);
                 }
@@ -393,26 +334,26 @@ namespace MetroFramework.Controls
 
             DrawTrackBar(e.Graphics, thumbColor, barColor);
 
-            if (displayFocusRectangle && isFocused)
+            if (DisplayFocus && isFocused)
                 ControlPaint.DrawFocusRectangle(e.Graphics, ClientRectangle);
         }
 
         private void DrawTrackBar(Graphics g, Color thumbColor, Color barColor)
         {
-            int TrackX = (((trackerValue - barMinimum) * (Width - 6)) / (barMaximum - barMinimum));
+            int TrackX = (trackerValue - barMinimum) * (Width - 6) / (barMaximum - barMinimum);
 
-            using (SolidBrush b = new SolidBrush(thumbColor))
+            using (SolidBrush b = new(thumbColor))
             {
-                Rectangle barRect = new Rectangle(0, Height / 2 - 2, TrackX, 4);
+                Rectangle barRect = new(0, (Height / 2) - 2, TrackX, 4);
                 g.FillRectangle(b, barRect);
 
-                Rectangle thumbRect = new Rectangle(TrackX, Height / 2 - 8, 6, 16);
+                Rectangle thumbRect = new(TrackX, (Height / 2) - 8, 6, 16);
                 g.FillRectangle(b, thumbRect);
             }
 
-            using (SolidBrush b = new SolidBrush(barColor))
+            using (SolidBrush b = new(barColor))
             {
-                Rectangle barRect = new Rectangle(TrackX + 7, Height / 2 - 2, Width - TrackX + 7, 4);
+                Rectangle barRect = new(TrackX + 7, (Height / 2) - 2, Width - TrackX + 7, 4);
                 g.FillRectangle(b, barRect);
             }
         }
@@ -482,12 +423,12 @@ namespace MetroFramework.Controls
             {
                 case Keys.Down:
                 case Keys.Left:
-                    SetProperValue(Value - (int)smallChange);
+                    SetProperValue(Value - (int)SmallChange);
                     OnScroll(ScrollEventType.SmallDecrement, Value);
                     break;
                 case Keys.Up:
                 case Keys.Right:
-                    SetProperValue(Value + (int)smallChange);
+                    SetProperValue(Value + (int)SmallChange);
                     OnScroll(ScrollEventType.SmallIncrement, Value);
                     break;
                 case Keys.Home:
@@ -497,15 +438,15 @@ namespace MetroFramework.Controls
                     Value = barMaximum;
                     break;
                 case Keys.PageDown:
-                    SetProperValue(Value - (int)largeChange);
+                    SetProperValue(Value - (int)LargeChange);
                     OnScroll(ScrollEventType.LargeDecrement, Value);
                     break;
                 case Keys.PageUp:
-                    SetProperValue(Value + (int)largeChange);
+                    SetProperValue(Value + (int)LargeChange);
                     OnScroll(ScrollEventType.LargeIncrement, Value);
                     break;
             }
-            
+
             if (Value == barMinimum)
                 OnScroll(ScrollEventType.First, Value);
 
@@ -567,9 +508,9 @@ namespace MetroFramework.Controls
                 ScrollEventType set = ScrollEventType.ThumbPosition;
                 Point pt = e.Location;
                 int p = pt.X;
-                
+
                 float coef = (float)(barMaximum - barMinimum) / (float)(ClientSize.Width - 3);
-                trackerValue = (int)(p * coef + barMinimum);
+                trackerValue = (int)((p * coef) + barMinimum);
 
                 if (trackerValue <= barMinimum)
                 {
@@ -628,9 +569,7 @@ namespace MetroFramework.Controls
 
         private void SetProperValue(int val)
         {
-            if (val < barMinimum) Value = barMinimum;
-            else if (val > barMaximum) Value = barMaximum;
-            else Value = val;
+            Value = val < barMinimum ? barMinimum : val > barMaximum ? barMaximum : val;
         }
 
         #endregion

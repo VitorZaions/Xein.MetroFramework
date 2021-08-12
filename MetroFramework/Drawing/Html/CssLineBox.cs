@@ -26,7 +26,6 @@
  */
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Drawing;
 
 namespace MetroFramework.Drawing.Html
@@ -43,10 +42,6 @@ namespace MetroFramework.Drawing.Html
 
         #region Fields
 
-        private List<CssBoxWord> _words;
-        private CssBox _ownerBox;
-        private Dictionary<CssBox, RectangleF> _rects;
-        private List<CssBox> _relatedBoxes;
 
         #endregion
 
@@ -57,52 +52,40 @@ namespace MetroFramework.Drawing.Html
         /// </summary>
         public CssLineBox(CssBox ownerBox)
         {
-            _rects = new Dictionary<CssBox, RectangleF>();
-            _relatedBoxes = new List<CssBox>();
-            _words = new List<CssBoxWord>();
-            _ownerBox = ownerBox;
-            _ownerBox.LineBoxes.Add(this);
+            Rectangles = new Dictionary<CssBox, RectangleF>();
+            RelatedBoxes = new List<CssBox>();
+            Words = new List<CssBoxWord>();
+            OwnerBox = ownerBox;
+            OwnerBox.LineBoxes.Add(this);
         }
 
         #endregion
 
         #region Props
 
-        
+
 
         /// <summary>
         /// Gets a list of boxes related with the linebox. 
         /// To know the words of the box inside this linebox, use the <see cref="WordsOf"/> method.
         /// </summary>
-        public List<CssBox> RelatedBoxes
-        {
-            get { return _relatedBoxes; }
-        }
+        public List<CssBox> RelatedBoxes { get; }
 
 
         /// <summary>
         /// Gets the words inside the linebox
         /// </summary>
-        public List<CssBoxWord> Words
-        {
-            get { return _words; }
-        }
+        public List<CssBoxWord> Words { get; }
 
         /// <summary>
         /// Gets the owner box
         /// </summary>
-        public CssBox OwnerBox
-        {
-            get { return _ownerBox; }
-        }
+        public CssBox OwnerBox { get; }
 
         /// <summary>
         /// Gets a List of rectangles that are to be painted on this linebox
         /// </summary>
-        public Dictionary<CssBox, RectangleF> Rectangles
-        {
-            get { return _rects; }
-        }
+        public Dictionary<CssBox, RectangleF> Rectangles { get; }
 
 
         #endregion
@@ -110,7 +93,7 @@ namespace MetroFramework.Drawing.Html
         #region Methods
 
 
-       
+
         /// <summary>
         /// Gets the maximum bottom of the words
         /// </summary>
@@ -153,7 +136,7 @@ namespace MetroFramework.Drawing.Html
         /// <returns></returns>
         internal List<CssBoxWord> WordsOf(CssBox box)
         {
-            List<CssBoxWord> r = new List<CssBoxWord>();
+            List<CssBoxWord> r = new();
 
             foreach (CssBoxWord word in Words)
                 if (word.OwnerBox.Equals(box)) r.Add(word);
@@ -184,7 +167,7 @@ namespace MetroFramework.Drawing.Html
                 y -= topspacing;
                 b += bottomspacing;
             }
-            
+
 
             if (!Rectangles.ContainsKey(box))
             {
@@ -223,7 +206,7 @@ namespace MetroFramework.Drawing.Html
         {
             foreach (CssBox b in Rectangles.Keys)
             {
-                if (float.IsInfinity(Rectangles[b].Width)) 
+                if (float.IsInfinity(Rectangles[b].Width))
                     continue;
                 g.FillRectangle(new SolidBrush(Color.FromArgb(50, Color.Black)),
                     Rectangle.Round(Rectangles[b]));
@@ -250,7 +233,7 @@ namespace MetroFramework.Drawing.Html
         /// <param name="g">Device info</param>
         /// <param name="b">box to check words</param>
         /// <param name="baseline">baseline</param>
-        internal void SetBaseLine(Graphics g,CssBox b, float baseline)
+        internal void SetBaseLine(Graphics g, CssBox b, float baseline)
         {
             //TODO: Aqui me quede, checar poniendo "by the" con un font-size de 3em
             List<CssBoxWord> ws = WordsOf(b);
@@ -286,7 +269,7 @@ namespace MetroFramework.Drawing.Html
             {
                 //Do this only if rectangle is shorter than parent's
                 float recttop = newtop - gap;
-                RectangleF newr = new RectangleF(r.X, recttop, r.Width, r.Height);
+                RectangleF newr = new(r.X, recttop, r.Width, r.Height);
                 Rectangles[b] = newr;
                 b.OffsetRectangle(this, gap);
             }

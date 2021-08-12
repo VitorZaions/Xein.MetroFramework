@@ -14,17 +14,17 @@ namespace MetroFramework.Demo
         {
             InitializeComponent();
 
-            this.BorderStyle = MetroFormBorderStyle.FixedSingle;
-            this.ShadowType = MetroFormShadowType.AeroShadow;
+            BorderStyle = MetroFormBorderStyle.FixedSingle;
+            ShadowType = MetroFormShadowType.AeroShadow;
 
-            DataTable _table = new DataTable();
+            DataTable _table = new();
             _table.ReadXml(Application.StartupPath + @"\Data\Books.xml");
             metroGrid1.DataSource = _table;
 
             metroGrid1.Font = new Font("Segoe UI", 11f, FontStyle.Regular, GraphicsUnit.Pixel);
             metroGrid1.AllowUserToAddRows = false;
 
-            this.metroComboBox4.DataSource = _table;
+            metroComboBox4.DataSource = _table;
             metroComboBox4.ValueMember = "Id";
             metroComboBox4.DisplayMember = "title";
         }

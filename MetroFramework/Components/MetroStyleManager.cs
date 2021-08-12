@@ -21,13 +21,13 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE 
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-using System;
-using System.ComponentModel;
-using System.Diagnostics;
-using System.Windows.Forms;
 using MetroFramework.Controls;
 using MetroFramework.Interfaces;
+
+using System;
+using System.ComponentModel;
 using System.Reflection;
+using System.Windows.Forms;
 
 namespace MetroFramework.Components
 {
@@ -113,7 +113,7 @@ namespace MetroFramework.Components
 
         public MetroStyleManager()
         {
-        
+
         }
 
         public MetroStyleManager(IContainer parentContainer)
@@ -132,7 +132,7 @@ namespace MetroFramework.Components
 
         public object Clone()
         {
-            MetroStyleManager newStyleManager = new MetroStyleManager();
+            MetroStyleManager newStyleManager = new();
             newStyleManager.metroTheme = Theme;
             newStyleManager.metroStyle = Style;
             return newStyleManager;
@@ -142,10 +142,10 @@ namespace MetroFramework.Components
         {
             MetroStyleManager clonedManager = Clone() as MetroStyleManager;
 
-            if (owner is IMetroForm)
+            if (owner is IMetroForm form)
             {
                 clonedManager.Owner = owner;
-                ((IMetroForm)owner).StyleManager = clonedManager;
+                form.StyleManager = clonedManager;
 
                 Type parentForm = owner.GetType();
                 FieldInfo fieldInfo = parentForm.GetField("components",
@@ -160,9 +160,9 @@ namespace MetroFramework.Components
                 // Check for a helper component
                 foreach (Component obj in mother.Components)
                 {
-                    if (obj is IMetroComponent)
+                    if (obj is IMetroComponent component)
                     {
-                        ApplyTheme((IMetroComponent)obj);
+                        ApplyTheme(component);
                     }
 
                     if (obj.GetType() == typeof(MetroContextMenu))
@@ -218,9 +218,9 @@ namespace MetroFramework.Components
 
             foreach (Object obj in parentContainer.Components)
             {
-                if (obj is IMetroComponent)
+                if (obj is IMetroComponent component)
                 {
-                    ApplyTheme((IMetroComponent)obj);
+                    ApplyTheme(component);
                 }
 
                 if (obj.GetType() == typeof(MetroContextMenu))
@@ -237,22 +237,19 @@ namespace MetroFramework.Components
                 return;
             }
 
-            IMetroControl metroControl = ctrl as IMetroControl;
-            if (metroControl != null)
+            if (ctrl is IMetroControl metroControl)
             {
                 ApplyTheme(metroControl);
             }
 
-            IMetroComponent metroComponent = ctrl as IMetroComponent;
-            if (metroComponent != null)
+            if (ctrl is IMetroComponent metroComponent)
             {
                 ApplyTheme(metroComponent);
             }
 
-            TabControl tabControl = ctrl as TabControl;
-            if (tabControl != null)
+            if (ctrl is TabControl control)
             {
-                foreach (TabPage tp in ((TabControl)ctrl).TabPages)
+                foreach (TabPage tp in control.TabPages)
                 {
                     UpdateControl(tp);
                 }

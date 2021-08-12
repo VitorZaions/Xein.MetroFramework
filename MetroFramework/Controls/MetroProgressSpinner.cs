@@ -21,14 +21,14 @@
 // OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
+using MetroFramework.Components;
+using MetroFramework.Drawing;
+using MetroFramework.Interfaces;
+
 using System;
 using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
-
-using MetroFramework.Components;
-using MetroFramework.Drawing;
-using MetroFramework.Interfaces;
 
 namespace MetroFramework.Controls
 {
@@ -75,21 +75,11 @@ namespace MetroFramework.Controls
         {
             get
             {
-                if (DesignMode || metroStyle != MetroColorStyle.Default)
-                {
-                    return metroStyle;
-                }
-
-                if (StyleManager != null && metroStyle == MetroColorStyle.Default)
-                {
-                    return StyleManager.Style;
-                }
-                if (StyleManager == null && metroStyle == MetroColorStyle.Default)
-                {
-                    return MetroDefaults.Style;
-                }
-
-                return metroStyle;
+                return DesignMode || metroStyle != MetroColorStyle.Default
+                    ? metroStyle
+                    : StyleManager != null && metroStyle == MetroColorStyle.Default
+                    ? StyleManager.Style
+                    : StyleManager == null && metroStyle == MetroColorStyle.Default ? MetroDefaults.Style : metroStyle;
             }
             set { metroStyle = value; }
         }
@@ -101,60 +91,30 @@ namespace MetroFramework.Controls
         {
             get
             {
-                if (DesignMode || metroTheme != MetroThemeStyle.Default)
-                {
-                    return metroTheme;
-                }
-
-                if (StyleManager != null && metroTheme == MetroThemeStyle.Default)
-                {
-                    return StyleManager.Theme;
-                }
-                if (StyleManager == null && metroTheme == MetroThemeStyle.Default)
-                {
-                    return MetroDefaults.Theme;
-                }
-
-                return metroTheme;
+                return DesignMode || metroTheme != MetroThemeStyle.Default
+                    ? metroTheme
+                    : StyleManager != null && metroTheme == MetroThemeStyle.Default
+                    ? StyleManager.Theme
+                    : StyleManager == null && metroTheme == MetroThemeStyle.Default ? MetroDefaults.Theme : metroTheme;
             }
             set { metroTheme = value; }
         }
 
-        private MetroStyleManager metroStyleManager = null;
         [Browsable(false)]
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public MetroStyleManager StyleManager
-        {
-            get { return metroStyleManager; }
-            set { metroStyleManager = value; }
-        }
+        public MetroStyleManager StyleManager { get; set; } = null;
 
-        private bool useCustomBackColor = false;
         [DefaultValue(false)]
         [Category(MetroDefaults.PropertyCategory.Appearance)]
-        public bool UseCustomBackColor
-        {
-            get { return useCustomBackColor; }
-            set { useCustomBackColor = value; }
-        }
+        public bool UseCustomBackColor { get; set; } = false;
 
-        private bool useCustomForeColor = false;
         [DefaultValue(false)]
         [Category(MetroDefaults.PropertyCategory.Appearance)]
-        public bool UseCustomForeColor
-        {
-            get { return useCustomForeColor; }
-            set { useCustomForeColor = value; }
-        }
+        public bool UseCustomForeColor { get; set; } = false;
 
-        private bool useStyleColors = false;
         [DefaultValue(false)]
         [Category(MetroDefaults.PropertyCategory.Appearance)]
-        public bool UseStyleColors
-        {
-            get { return useStyleColors; }
-            set { useStyleColors = value; }
-        }
+        public bool UseStyleColors { get; set; } = false;
 
         [Browsable(false)]
         [Category(MetroDefaults.PropertyCategory.Behaviour)]
@@ -169,7 +129,7 @@ namespace MetroFramework.Controls
 
         #region Fields
 
-        private Timer timer;
+        private readonly Timer timer;
         private int progress;
         private float angle = 270;
 
@@ -248,7 +208,7 @@ namespace MetroFramework.Controls
             get { return speed; }
             set
             {
-                if (value <= 0 || value > 10)
+                if (value is <= 0 or > 10)
                     throw new ArgumentOutOfRangeException("Speed value must be > 0 and <= 10.", (Exception)null);
 
                 speed = value;
@@ -264,14 +224,9 @@ namespace MetroFramework.Controls
             set { backwards = value; Refresh(); }
         }
 
-        private bool useCustomBackground = false;
         [DefaultValue(false)]
         [Category(MetroDefaults.PropertyCategory.Appearance)]
-        public bool CustomBackground
-        {
-            get { return useCustomBackground; }
-            set { useCustomBackground = value; }
-        }
+        public bool CustomBackground { get; set; } = false;
 
         #endregion
 
@@ -279,9 +234,11 @@ namespace MetroFramework.Controls
 
         public MetroProgressSpinner()
         {
-            timer = new Timer();
-            timer.Interval = 20;
-            timer.Tick += timer_Tick;
+            timer = new Timer
+            {
+                Interval = 20
+            };
+            timer.Tick += Timer_Tick;
             timer.Enabled = true;
 
             Width = 16;
@@ -305,7 +262,7 @@ namespace MetroFramework.Controls
 
         #region Management Methods
 
-        private void timer_Tick(object sender, EventArgs e)
+        private void Timer_Tick(object sender, EventArgs e)
         {
             if (!DesignMode)
             {
@@ -324,16 +281,9 @@ namespace MetroFramework.Controls
             {
                 Color backColor = BackColor;
 
-                if (!useCustomBackColor)
+                if (!UseCustomBackColor)
                 {
-                    if (Parent is MetroTile)
-                    {
-                        backColor = MetroPaint.GetStyleColor(Style);
-                    }
-                    else
-                    {
-                        backColor = MetroPaint.BackColor.Form(Theme);
-                    }
+                    backColor = Parent is MetroTile ? MetroPaint.GetStyleColor(Style) : MetroPaint.BackColor.Form(Theme);
                 }
 
                 if (backColor.A == 255)
@@ -372,25 +322,10 @@ namespace MetroFramework.Controls
 
         protected virtual void OnPaintForeground(PaintEventArgs e)
         {
-            Color foreColor;
-
-            if (useCustomBackground)
-            {
-                foreColor = MetroPaint.GetStyleColor(Style);
-            }
-            else
-            {
-                if (Parent is MetroTile)
-                {
-                    foreColor = MetroPaint.ForeColor.Tile.Normal(Theme);
-                }
-                else
-                {
-                    foreColor = MetroPaint.GetStyleColor(Style);
-                }
-            }
-
-            using (Pen forePen = new Pen(foreColor, (float)Width / 5))
+            Color foreColor = CustomBackground
+                ? MetroPaint.GetStyleColor(Style)
+                : Parent is MetroTile ? MetroPaint.ForeColor.Tile.Normal(Theme) : MetroPaint.GetStyleColor(Style);
+            using (Pen forePen = new(foreColor, (float)Width / 5))
             {
                 int padding = (int)Math.Ceiling((float)Width / 10);
 
@@ -401,21 +336,14 @@ namespace MetroFramework.Controls
                     float sweepAngle;
                     float progFrac = (float)(progress - minimum) / (float)(maximum - minimum);
 
-                    if (ensureVisible)
-                    {
-                        sweepAngle = 30 + 300f * progFrac;
-                    }
-                    else
-                    {
-                        sweepAngle = 360f * progFrac;
-                    }
+                    sweepAngle = ensureVisible ? 30 + (300f * progFrac) : 360f * progFrac;
 
                     if (backwards)
                     {
                         sweepAngle = -sweepAngle;
                     }
 
-                    e.Graphics.DrawArc(forePen, padding, padding, Width - 2 * padding - 1, Height - 2 * padding - 1, angle, sweepAngle);
+                    e.Graphics.DrawArc(forePen, padding, padding, Width - (2 * padding) - 1, Height - (2 * padding) - 1, angle, sweepAngle);
                 }
                 else
                 {
@@ -434,12 +362,10 @@ namespace MetroFramework.Controls
                         }
 
                         Color col = Color.FromArgb(alpha, forePen.Color);
-                        using (Pen gradPen = new Pen(col, forePen.Width))
-                        {
-                            float startAngle = angle + (offset - (ensureVisible ? 30 : 0)) * (backwards ? 1 : -1);
-                            float sweepAngle = 15 * (backwards ? 1 : -1);
-                            e.Graphics.DrawArc(gradPen, padding, padding, Width - 2 * padding - 1, Height - 2 * padding - 1, startAngle, sweepAngle);
-                        }
+                        using Pen gradPen = new(col, forePen.Width);
+                        float startAngle = angle + ((offset - (ensureVisible ? 30 : 0)) * (backwards ? 1 : -1));
+                        float sweepAngle = 15 * (backwards ? 1 : -1);
+                        e.Graphics.DrawArc(gradPen, padding, padding, Width - (2 * padding) - 1, Height - (2 * padding) - 1, startAngle, sweepAngle);
                     }
                 }
             }

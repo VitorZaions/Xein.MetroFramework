@@ -24,9 +24,6 @@
  * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF 
  * THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Drawing;
 
 namespace MetroFramework.Drawing.Html
@@ -47,9 +44,7 @@ namespace MetroFramework.Drawing.Html
         #region Fields
 
 
-        private string _word;
         private PointF _lastMeasureOffset;
-        private CssBox _ownerBox;
         private Image _image;
 
 
@@ -59,8 +54,8 @@ namespace MetroFramework.Drawing.Html
 
         internal CssBoxWord(CssBox owner)
         {
-            _ownerBox = owner;
-            _word = string.Empty;
+            OwnerBox = owner;
+            Text = string.Empty;
         }
 
         /// <summary>
@@ -93,35 +88,20 @@ namespace MetroFramework.Drawing.Html
         public Image Image
         {
             get { return _image; }
-            set 
-            { 
+            set
+            {
                 _image = value;
 
                 if (value != null)
                 {
-                    CssLength w = new CssLength(OwnerBox.Width);
-                    CssLength h = new CssLength(OwnerBox.Height);
-                    if (w.Number > 0 && w.Unit == CssLength.CssUnit.Pixels)
-                    {
-                        Width = w.Number;
-                    }
-                    else
-                    {
-                        Width = value.Width;
-                    }
+                    CssLength w = new(OwnerBox.Width);
+                    CssLength h = new(OwnerBox.Height);
+                    Width = w.Number > 0 && w.Unit == CssLength.CssUnit.Pixels ? w.Number : value.Width;
 
-                    if (h.Number > 0 && h.Unit == CssLength.CssUnit.Pixels)
-                    {
-
-                        Height = h.Number;
-                    }
-                    else
-                    {
-                        Height = value.Height;
-                    }
+                    Height = h.Number > 0 && h.Unit == CssLength.CssUnit.Pixels ? h.Number : value.Height;
 
                     Height += OwnerBox.ActualBorderBottomWidth + OwnerBox.ActualBorderTopWidth + OwnerBox.ActualPaddingTop + OwnerBox.ActualPaddingBottom;
-                    
+
                 }
             }
         }
@@ -162,18 +142,12 @@ namespace MetroFramework.Drawing.Html
         /// <summary>
         /// Gets the Box where this word belongs.
         /// </summary>
-        public CssBox OwnerBox
-        {
-            get { return _ownerBox; }
-        }
+        public CssBox OwnerBox { get; }
 
         /// <summary>
         /// Gets the text of the word
         /// </summary>
-        public string Text
-        {
-            get { return _word; }
-        }
+        public string Text { get; private set; }
 
         /// <summary>
         /// Gets or sets an offset to be considered in measurements
@@ -194,8 +168,8 @@ namespace MetroFramework.Drawing.Html
         /// </summary>
         internal void ReplaceLineBreaksAndTabs()
         {
-            _word = _word.Replace('\n', ' ');
-            _word = _word.Replace('\t', ' ');
+            Text = Text.Replace('\n', ' ');
+            Text = Text.Replace('\t', ' ');
         }
 
         /// <summary>
@@ -204,7 +178,7 @@ namespace MetroFramework.Drawing.Html
         /// <param name="c"></param>
         internal void AppendChar(char c)
         {
-            _word += c;
+            Text += c;
         }
 
         /// <summary>
@@ -213,7 +187,7 @@ namespace MetroFramework.Drawing.Html
         /// <returns></returns>
         public override string ToString()
         {
-            
+
             return string.Format("{0} ({1} char{2})", Text.Replace(' ', '-').Replace("\n", "\\n"), Text.Length, Text.Length != 1 ? "s" : string.Empty);
         }
 

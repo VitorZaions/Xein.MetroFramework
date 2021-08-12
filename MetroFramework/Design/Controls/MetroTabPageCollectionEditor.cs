@@ -27,12 +27,10 @@
 // http://dotnetrix.co.uk/tabcontrol.htm
 // http://www.pcreview.co.uk/forums/adding-custom-tabpages-design-time-t2904262.html
 
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.Design;
-using System.Text;
-
 using MetroFramework.Controls;
+
+using System;
+using System.ComponentModel.Design;
 
 namespace MetroFramework.Design.Controls
 {

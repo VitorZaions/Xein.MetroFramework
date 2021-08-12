@@ -21,14 +21,12 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE 
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-using System;
-using System.Collections.Generic;
+using MetroFramework.Drawing;
+using MetroFramework.Interfaces;
+
 using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
-
-using MetroFramework.Interfaces;
-using MetroFramework.Drawing;
 
 namespace MetroFramework.Components
 {
@@ -43,10 +41,7 @@ namespace MetroFramework.Components
         {
             get
             {
-                if (StyleManager != null)
-                    return StyleManager.Style;
-
-                return metroStyle;
+                return StyleManager != null ? StyleManager.Style : metroStyle;
             }
             set { metroStyle = value; }
         }
@@ -57,21 +52,13 @@ namespace MetroFramework.Components
         {
             get
             {
-                if (StyleManager != null)
-                    return StyleManager.Theme;
-
-                return metroTheme;
+                return StyleManager != null ? StyleManager.Theme : metroTheme;
             }
             set { metroTheme = value; }
         }
 
-        private MetroStyleManager metroStyleManager = null;
         [Browsable(false)]
-        public MetroStyleManager StyleManager
-        {
-            get { return metroStyleManager; }
-            set { metroStyleManager = value; }
-        }
+        public MetroStyleManager StyleManager { get; set; } = null;
 
         #endregion
 
@@ -160,17 +147,17 @@ namespace MetroFramework.Components
 
         private void MetroToolTip_Popup(object sender, PopupEventArgs e)
         {
-            if (e.AssociatedWindow is IMetroForm)
+            if (e.AssociatedWindow is IMetroForm form)
             {
-                Style = ((IMetroForm)e.AssociatedWindow).Style;
-                Theme = ((IMetroForm)e.AssociatedWindow).Theme;
-                StyleManager = ((IMetroForm)e.AssociatedWindow).StyleManager;
+                Style = form.Style;
+                Theme = form.Theme;
+                StyleManager = form.StyleManager;
             }
-            else if (e.AssociatedControl is IMetroControl)
+            else if (e.AssociatedControl is IMetroControl control)
             {
-                Style = ((IMetroControl)e.AssociatedControl).Style;
-                Theme = ((IMetroControl)e.AssociatedControl).Theme;
-                StyleManager = ((IMetroControl)e.AssociatedControl).StyleManager;
+                Style = control.Style;
+                Theme = control.Theme;
+                StyleManager = control.StyleManager;
             }
 
             e.ToolTipSize = new Size(e.ToolTipSize.Width + 24, e.ToolTipSize.Height + 9);
@@ -184,11 +171,11 @@ namespace MetroFramework.Components
             Color borderColor = MetroPaint.BorderColor.Button.Normal(displayTheme);
             Color foreColor = MetroPaint.ForeColor.Label.Normal(displayTheme);
 
-            using (SolidBrush b = new SolidBrush(backColor))
+            using (SolidBrush b = new(backColor))
             {
                 e.Graphics.FillRectangle(b, e.Bounds);
             }
-            using (Pen p = new Pen(borderColor))
+            using (Pen p = new(borderColor))
             {
                 e.Graphics.DrawRectangle(p, new Rectangle(e.Bounds.X, e.Bounds.Y, e.Bounds.Width - 1, e.Bounds.Height - 1));
             }

@@ -25,8 +25,6 @@ using System.Collections;
 using System.ComponentModel;
 using System.Windows.Forms.Design;
 
-using MetroFramework.Controls;
-
 namespace MetroFramework.Design.Controls
 {
     internal class MetroTextBoxDesigner : ControlDesigner
@@ -41,12 +39,9 @@ namespace MetroFramework.Design.Controls
                 {
                     bool isMultiline = (bool)propDescriptor.GetValue(Component);
 
-                    if (isMultiline)
-                    {
-                        return SelectionRules.Visible | SelectionRules.Moveable | SelectionRules.AllSizeable;
-                    }
-
-                    return SelectionRules.Visible | SelectionRules.Moveable | SelectionRules.LeftSizeable | SelectionRules.RightSizeable;
+                    return isMultiline
+                        ? SelectionRules.Visible | SelectionRules.Moveable | SelectionRules.AllSizeable
+                        : SelectionRules.Visible | SelectionRules.Moveable | SelectionRules.LeftSizeable | SelectionRules.RightSizeable;
                 }
 
                 return base.SelectionRules;

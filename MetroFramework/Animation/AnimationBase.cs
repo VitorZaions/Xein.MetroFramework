@@ -34,12 +34,10 @@ namespace MetroFramework.Animation
         public event EventHandler AnimationCompleted;
         private void OnAnimationCompleted()
         {
-            if (AnimationCompleted != null)
-                AnimationCompleted(this, EventArgs.Empty);
+            AnimationCompleted?.Invoke(this, EventArgs.Empty);
         }
 
         private DelayedCall timer;
-        private Control targetControl;
 
         private AnimationAction actionHandler;
         private AnimationFinishedEvaluator evaluatorHandler;
@@ -49,24 +47,18 @@ namespace MetroFramework.Animation
         protected int startTime;
         protected int targetTime;
 
-        public bool IsCompleted 
+        public bool IsCompleted
         {
             get
             {
-                if (timer != null)
-                    return !timer.IsWaiting;
-
-                return true;
+                return timer == null || !timer.IsWaiting;
             }
         }
-        public bool IsRunning 
+        public bool IsRunning
         {
             get
             {
-                if (timer != null)
-                    return timer.IsWaiting;
-
-                return false;
+                return timer != null && timer.IsWaiting;
             }
         }
 
@@ -80,16 +72,16 @@ namespace MetroFramework.Animation
         {
             Start(control, transitionType, duration, actionHandler, null);
         }
+
         protected void Start(Control control, TransitionType transitionType, int duration, AnimationAction actionHandler, AnimationFinishedEvaluator evaluatorHandler)
         {
-            this.targetControl = control;
             this.transitionType = transitionType;
             this.actionHandler = actionHandler;
             this.evaluatorHandler = evaluatorHandler;
 
-            this.counter = 0;
-            this.startTime = 0;
-            this.targetTime = duration;
+            counter = 0;
+            startTime = 0;
+            targetTime = duration;
 
             timer = DelayedCall.Start(DoAnimation, duration);
         }
@@ -111,79 +103,20 @@ namespace MetroFramework.Animation
 
         protected int MakeTransition(float t, float b, float d, float c)
         {
-            switch (transitionType)
+            return transitionType switch
             {
-                case TransitionType.Linear:
-                    // simple linear tweening - no easing 
-                    return (int)(c * t / d + b);
-
-                case TransitionType.EaseInQuad:
-                    // quadratic (t^2) easing in - accelerating from zero velocity
-                    return (int)(c * (t /= d) * t + b);
-
-                case TransitionType.EaseOutQuad:
-                    // quadratic (t^2) easing out - decelerating to zero velocity
-                    return (int)(-c * (t = t / d) * (t - 2) + b);
-
-                case TransitionType.EaseInOutQuad:
-                    // quadratic easing in/out - acceleration until halfway, then deceleration
-                    if ((t /= d / 2) < 1)
-                    {
-                        return (int)(c / 2 * t * t + b);
-                    }
-                    else
-                    {
-                        return (int)(-c / 2 * ((--t) * (t - 2) - 1) + b);
-                    }
-
-                case TransitionType.EaseInCubic:
-                    // cubic easing in - accelerating from zero velocity
-                    return (int)(c * (t /= d) * t * t + b);
-
-                case TransitionType.EaseOutCubic:
-                    // cubic easing in - accelerating from zero velocity
-                    return (int)(c * ((t = t / d - 1) * t * t + 1) + b);
-
-                case TransitionType.EaseInOutCubic:
-                    // cubic easing in - accelerating from zero velocity
-                    if ((t /= d / 2) < 1)
-                    {
-                        return (int)(c / 2 * t * t * t + b);
-                    }
-                    else
-                    {
-                        return (int)(c / 2 * ((t -= 2) * t * t + 2) + b);
-                    }
-
-                case TransitionType.EaseInQuart:
-                    // quartic easing in - accelerating from zero velocity
-                    return (int)(c * (t /= d) * t * t * t + b);
-
-                case TransitionType.EaseInExpo:
-                    // exponential (2^t) easing in - accelerating from zero velocity
-                    if (t == 0)
-                    {
-                        return (int)b;
-                    }
-                    else
-                    {
-                        return (int)(c * Math.Pow(2, (10 * (t / d - 1))) + b);
-                    }
-
-                case TransitionType.EaseOutExpo:
-                    // exponential (2^t) easing out - decelerating to zero velocity
-                    if (t == d)
-                    {
-                        return (int)(b + c);
-                    }
-                    else
-                    {
-                        return (int)(c * (-Math.Pow(2, -10 * t / d) + 1) + b);
-                    }
-
-                default:
-                    return 0;
-            }
+                TransitionType.Linear => (int)((c * t / d) + b),// simple linear tweening - no easing 
+                TransitionType.EaseInQuad => (int)((c * (t /= d) * t) + b),// quadratic (t^2) easing in - accelerating from zero velocity
+                TransitionType.EaseOutQuad => (int)((-c * (t /= d) * (t - 2)) + b),// quadratic (t^2) easing out - decelerating to zero velocity
+                TransitionType.EaseInOutQuad => (t /= d / 2) < 1 ? (int)((c / 2 * t * t) + b) : (int)((-c / 2 * (((--t) * (t - 2)) - 1)) + b),// quadratic easing in/out - acceleration until halfway, then deceleration
+                TransitionType.EaseInCubic => (int)((c * (t /= d) * t * t) + b),// cubic easing in - accelerating from zero velocity
+                TransitionType.EaseOutCubic => (int)((c * (((t = (t / d) - 1) * t * t) + 1)) + b),// cubic easing in - accelerating from zero velocity
+                TransitionType.EaseInOutCubic => (t /= d / 2) < 1 ? (int)((c / 2 * t * t * t) + b) : (int)((c / 2 * (((t -= 2) * t * t) + 2)) + b),// cubic easing in - accelerating from zero velocity
+                TransitionType.EaseInQuart => (int)((c * (t /= d) * t * t * t) + b),// quartic easing in - accelerating from zero velocity
+                TransitionType.EaseInExpo => t == 0 ? (int)b : (int)((c * Math.Pow(2, 10 * ((t / d) - 1))) + b),// exponential (2^t) easing in - accelerating from zero velocity
+                TransitionType.EaseOutExpo => t == d ? (int)(b + c) : (int)((c * (-Math.Pow(2, -10 * t / d) + 1)) + b),// exponential (2^t) easing out - decelerating to zero velocity
+                _ => 0,
+            };
         }
     }
 }

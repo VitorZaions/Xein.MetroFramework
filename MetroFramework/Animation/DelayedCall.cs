@@ -50,7 +50,7 @@ namespace MetroFramework.Animation
         }
 
         #region Compatibility code
-        private DelayedCall<object>.Callback oldCallback = null;
+        private readonly DelayedCall<object>.Callback oldCallback = null;
         private object oldData = null;
 
         [Obsolete("Use the static method DelayedCall.Create instead.")]
@@ -114,7 +114,7 @@ namespace MetroFramework.Animation
 
         public static DelayedCall Create(Callback cb, int milliseconds)
         {
-            DelayedCall dc = new DelayedCall();
+            DelayedCall dc = new();
             PrepareDCObject(dc, milliseconds, false);
             dc.callback = cb;
             return dc;
@@ -122,7 +122,7 @@ namespace MetroFramework.Animation
 
         public static DelayedCall CreateAsync(Callback cb, int milliseconds)
         {
-            DelayedCall dc = new DelayedCall();
+            DelayedCall dc = new();
             PrepareDCObject(dc, milliseconds, true);
             dc.callback = cb;
             return dc;
@@ -148,7 +148,7 @@ namespace MetroFramework.Animation
         {
             if (milliseconds < 0)
             {
-                throw new ArgumentOutOfRangeException("milliseconds", "The new timeout must be 0 or greater.");
+                throw new ArgumentOutOfRangeException(nameof(milliseconds), "The new timeout must be 0 or greater.");
             }
 
             dc.context = null;
@@ -312,9 +312,9 @@ namespace MetroFramework.Animation
                     if (cancelled) return;
                 }
 
-                if (callback != null) callback();
+                callback?.Invoke();
                 #region Compatibility code
-                if (oldCallback != null) oldCallback(oldData);
+                oldCallback?.Invoke(oldData);
                 #endregion
             }, null);
         }
@@ -379,7 +379,7 @@ namespace MetroFramework.Animation
 
         public static DelayedCall<T> Create(Callback cb, T data, int milliseconds)
         {
-            DelayedCall<T> dc = new DelayedCall<T>();
+            DelayedCall<T> dc = new();
             PrepareDCObject(dc, milliseconds, false);
             dc.callback = cb;
             dc.data = data;
@@ -388,7 +388,7 @@ namespace MetroFramework.Animation
 
         public static DelayedCall<T> CreateAsync(Callback cb, T data, int milliseconds)
         {
-            DelayedCall<T> dc = new DelayedCall<T>();
+            DelayedCall<T> dc = new();
             PrepareDCObject(dc, milliseconds, true);
             dc.callback = cb;
             dc.data = data;
@@ -418,7 +418,7 @@ namespace MetroFramework.Animation
                     if (cancelled) return;
                 }
 
-                if (callback != null) callback(data);
+                callback?.Invoke(data);
             }, null);
         }
 
@@ -444,7 +444,7 @@ namespace MetroFramework.Animation
 
         public static DelayedCall<T1, T2> Create(Callback cb, T1 data1, T2 data2, int milliseconds)
         {
-            DelayedCall<T1, T2> dc = new DelayedCall<T1, T2>();
+            DelayedCall<T1, T2> dc = new();
             PrepareDCObject(dc, milliseconds, false);
             dc.callback = cb;
             dc.data1 = data1;
@@ -454,7 +454,7 @@ namespace MetroFramework.Animation
 
         public static DelayedCall<T1, T2> CreateAsync(Callback cb, T1 data1, T2 data2, int milliseconds)
         {
-            DelayedCall<T1, T2> dc = new DelayedCall<T1, T2>();
+            DelayedCall<T1, T2> dc = new();
             PrepareDCObject(dc, milliseconds, true);
             dc.callback = cb;
             dc.data1 = data1;
@@ -485,7 +485,7 @@ namespace MetroFramework.Animation
                     if (cancelled) return;
                 }
 
-                if (callback != null) callback(data1, data2);
+                callback?.Invoke(data1, data2);
             }, null);
         }
 
@@ -513,7 +513,7 @@ namespace MetroFramework.Animation
 
         public static DelayedCall<T1, T2, T3> Create(Callback cb, T1 data1, T2 data2, T3 data3, int milliseconds)
         {
-            DelayedCall<T1, T2, T3> dc = new DelayedCall<T1, T2, T3>();
+            DelayedCall<T1, T2, T3> dc = new();
             PrepareDCObject(dc, milliseconds, false);
             dc.callback = cb;
             dc.data1 = data1;
@@ -524,7 +524,7 @@ namespace MetroFramework.Animation
 
         public static DelayedCall<T1, T2, T3> CreateAsync(Callback cb, T1 data1, T2 data2, T3 data3, int milliseconds)
         {
-            DelayedCall<T1, T2, T3> dc = new DelayedCall<T1, T2, T3>();
+            DelayedCall<T1, T2, T3> dc = new();
             PrepareDCObject(dc, milliseconds, true);
             dc.callback = cb;
             dc.data1 = data1;
@@ -556,7 +556,7 @@ namespace MetroFramework.Animation
                     if (cancelled) return;
                 }
 
-                if (callback != null) callback(data1, data2, data3);
+                callback?.Invoke(data1, data2, data3);
             }, null);
         }
 

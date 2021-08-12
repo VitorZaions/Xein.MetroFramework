@@ -28,7 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.panelbody = new System.Windows.Forms.Panel();
+            this.Body = new System.Windows.Forms.Panel();
             this.tlpBody = new System.Windows.Forms.TableLayoutPanel();
             this.messageLabel = new System.Windows.Forms.Label();
             this.titleLabel = new System.Windows.Forms.Label();
@@ -36,21 +36,21 @@
             this.metroButton2 = new MetroFramework.Controls.MetroButton();
             this.metroButton1 = new MetroFramework.Controls.MetroButton();
             this.metroButton3 = new MetroFramework.Controls.MetroButton();
-            this.panelbody.SuspendLayout();
+            this.Body.SuspendLayout();
             this.tlpBody.SuspendLayout();
             this.pnlBottom.SuspendLayout();
             this.SuspendLayout();
             // 
             // panelbody
             // 
-            this.panelbody.BackColor = System.Drawing.Color.DarkGray;
-            this.panelbody.Controls.Add(this.tlpBody);
-            this.panelbody.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panelbody.Location = new System.Drawing.Point(0, 0);
-            this.panelbody.Margin = new System.Windows.Forms.Padding(0);
-            this.panelbody.Name = "panelbody";
-            this.panelbody.Size = new System.Drawing.Size(804, 211);
-            this.panelbody.TabIndex = 2;
+            this.Body.BackColor = System.Drawing.Color.DarkGray;
+            this.Body.Controls.Add(this.tlpBody);
+            this.Body.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.Body.Location = new System.Drawing.Point(0, 0);
+            this.Body.Margin = new System.Windows.Forms.Padding(0);
+            this.Body.Name = "panelbody";
+            this.Body.Size = new System.Drawing.Size(804, 211);
+            this.Body.TabIndex = 2;
             // 
             // tlpBody
             // 
@@ -153,13 +153,13 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(804, 211);
             this.ControlBox = false;
-            this.Controls.Add(this.panelbody);
+            this.Controls.Add(this.Body);
             this.Font = new System.Drawing.Font("Segoe UI Light", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
             this.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.Name = "MetroMessageBoxControl";
             this.StartPosition = System.Windows.Forms.FormStartPosition.Manual;
-            this.panelbody.ResumeLayout(false);
+            this.Body.ResumeLayout(false);
             this.tlpBody.ResumeLayout(false);
             this.tlpBody.PerformLayout();
             this.pnlBottom.ResumeLayout(false);
@@ -169,7 +169,6 @@
 
         #endregion
 
-        private System.Windows.Forms.Panel panelbody;
         private System.Windows.Forms.Label titleLabel;
         private System.Windows.Forms.Label messageLabel;
         private Controls.MetroButton metroButton1;

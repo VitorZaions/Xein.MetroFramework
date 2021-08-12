@@ -21,14 +21,14 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE 
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-using System;
-using System.Drawing;
-using System.ComponentModel;
-using System.Windows.Forms;
-
 using MetroFramework.Components;
 using MetroFramework.Drawing;
 using MetroFramework.Interfaces;
+
+using System;
+using System.ComponentModel;
+using System.Drawing;
+using System.Windows.Forms;
 
 namespace MetroFramework.Controls
 {
@@ -76,21 +76,9 @@ namespace MetroFramework.Controls
         {
             get
             {
-                if (DesignMode || metroStyle != MetroColorStyle.Default)
-                {
-                    return metroStyle;
-                }
-
-                if (StyleManager != null && metroStyle == MetroColorStyle.Default)
-                {
-                    return StyleManager.Style;
-                }
-                if (StyleManager == null && metroStyle == MetroColorStyle.Default)
-                {
-                    return MetroDefaults.Style;
-                }
-
-                return metroStyle;
+                return DesignMode || metroStyle != MetroColorStyle.Default
+                    ? metroStyle : StyleManager != null && metroStyle == MetroColorStyle.Default
+                    ? StyleManager.Style : StyleManager == null && metroStyle == MetroColorStyle.Default ? MetroDefaults.Style : metroStyle;
             }
             set { metroStyle = value; }
         }
@@ -102,60 +90,28 @@ namespace MetroFramework.Controls
         {
             get
             {
-                if (DesignMode || metroTheme != MetroThemeStyle.Default)
-                {
-                    return metroTheme;
-                }
-
-                if (StyleManager != null && metroTheme == MetroThemeStyle.Default)
-                {
-                    return StyleManager.Theme;
-                }
-                if (StyleManager == null && metroTheme == MetroThemeStyle.Default)
-                {
-                    return MetroDefaults.Theme;
-                }
-
-                return metroTheme;
+                return DesignMode || metroTheme != MetroThemeStyle.Default
+                    ? metroTheme : StyleManager != null && metroTheme == MetroThemeStyle.Default
+                    ? StyleManager.Theme : StyleManager == null && metroTheme == MetroThemeStyle.Default ? MetroDefaults.Theme : metroTheme;
             }
             set { metroTheme = value; }
         }
 
-        private MetroStyleManager metroStyleManager = null;
         [Browsable(false)]
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public MetroStyleManager StyleManager
-        {
-            get { return metroStyleManager; }
-            set { metroStyleManager = value; }
-        }
+        public MetroStyleManager StyleManager { get; set; } = null;
 
-        private bool useCustomBackColor= false;
         [DefaultValue(false)]
         [Category(MetroDefaults.PropertyCategory.Appearance)]
-        public bool UseCustomBackColor
-        {
-            get { return useCustomBackColor; }
-            set { useCustomBackColor = value; }
-        }
+        public bool UseCustomBackColor { get; set; } = false;
 
-        private bool useCustomForeColor = false;
         [DefaultValue(false)]
         [Category(MetroDefaults.PropertyCategory.Appearance)]
-        public bool UseCustomForeColor
-        {
-            get { return useCustomForeColor; }
-            set { useCustomForeColor = value; }
-        }
+        public bool UseCustomForeColor { get; set; } = false;
 
-        private bool useStyleColors = false;
         [DefaultValue(false)]
         [Category(MetroDefaults.PropertyCategory.Appearance)]
-        public bool UseStyleColors
-        {
-            get { return useStyleColors; }
-            set { useStyleColors = value; }
-        }
+        public bool UseStyleColors { get; set; } = false;
 
         [Browsable(false)]
         [Category(MetroDefaults.PropertyCategory.Behaviour)]
@@ -170,41 +126,21 @@ namespace MetroFramework.Controls
 
         #region Fields
 
-        private bool displayFocusRectangle = false;
         [DefaultValue(false)]
         [Category(MetroDefaults.PropertyCategory.Appearance)]
-        public bool DisplayFocus
-        {
-            get { return displayFocusRectangle; }
-            set { displayFocusRectangle = value; }
-        }
+        public bool DisplayFocus { get; set; } = false;
 
-        private bool highlight = false;
         [DefaultValue(false)]
         [Category(MetroDefaults.PropertyCategory.Appearance)]
-        public bool Highlight
-        {
-            get { return highlight; }
-            set { highlight = value; }
-        }
+        public bool Highlight { get; set; } = false;
 
-        private MetroButtonSize metroButtonSize = MetroButtonSize.Small;
         [DefaultValue(MetroButtonSize.Small)]
         [Category(MetroDefaults.PropertyCategory.Appearance)]
-        public MetroButtonSize FontSize
-        {
-            get { return metroButtonSize; }
-            set { metroButtonSize = value; }
-        }
+        public MetroButtonSize FontSize { get; set; } = MetroButtonSize.Small;
 
-        private MetroButtonWeight metroButtonWeight = MetroButtonWeight.Bold;
         [DefaultValue(MetroButtonWeight.Bold)]
         [Category(MetroDefaults.PropertyCategory.Appearance)]
-        public MetroButtonWeight FontWeight
-        {
-            get { return metroButtonWeight; }
-            set { metroButtonWeight = value; }
-        }
+        public MetroButtonWeight FontWeight { get; set; } = MetroButtonWeight.Bold;
 
         private bool isHovered = false;
         private bool isPressed = false;
@@ -228,7 +164,7 @@ namespace MetroFramework.Controls
 
         protected override void OnPaintBackground(PaintEventArgs e)
         {
-            try 
+            try
             {
                 Color backColor = BackColor;
 
@@ -246,31 +182,31 @@ namespace MetroFramework.Controls
                 }
                 else
                 {
-                    if (!useCustomBackColor)
+                    if (!UseCustomBackColor)
                     {
                         backColor = MetroPaint.BackColor.Button.Normal(Theme);
-                    } 
+                    }
                 }
 
                 if (backColor.A == 255 && BackgroundImage == null)
-                { 
-                    e.Graphics.Clear(backColor); 
-                    return; 
-                } 
-                
+                {
+                    e.Graphics.Clear(backColor);
+                    return;
+                }
+
                 base.OnPaintBackground(e);
 
                 OnCustomPaintBackground(new MetroPaintEventArgs(backColor, Color.Empty, e.Graphics));
             }
             catch
-            { 
-                Invalidate(); 
+            {
+                Invalidate();
             }
         }
 
         protected override void OnPaint(PaintEventArgs e)
         {
-            try			
+            try
             {
                 if (GetStyle(ControlStyles.AllPaintingInWmPaint))
                 {
@@ -278,10 +214,10 @@ namespace MetroFramework.Controls
                 }
 
                 OnCustomPaint(new MetroPaintEventArgs(Color.Empty, Color.Empty, e.Graphics));
-                OnPaintForeground(e); 
+                OnPaintForeground(e);
             }
-            catch 
-            { 
+            catch
+            {
                 Invalidate();
             }
         }
@@ -308,42 +244,29 @@ namespace MetroFramework.Controls
             else
             {
                 borderColor = MetroPaint.BorderColor.Button.Normal(Theme);
-                if (useCustomForeColor)
-                {
-                    foreColor = ForeColor;
-                }
-                else if (useStyleColors)
-                {
-                    foreColor = MetroPaint.GetStyleColor(Style);
-                }
-                else
-                {
-                    foreColor = MetroPaint.ForeColor.Button.Normal(Theme);
-                }
+                foreColor = UseCustomForeColor ? ForeColor : UseStyleColors ? MetroPaint.GetStyleColor(Style) : MetroPaint.ForeColor.Button.Normal(Theme);
             }
-            
-            using (Pen p = new Pen(borderColor))
+
+            using (Pen p = new(borderColor))
             {
-                Rectangle borderRect = new Rectangle(0, 0, Width - 1, Height - 1);
+                Rectangle borderRect = new(0, 0, Width - 1, Height - 1);
                 e.Graphics.DrawRectangle(p, borderRect);
             }
 
             if (Highlight && !isHovered && !isPressed && Enabled)
             {
-                using (Pen p = MetroPaint.GetStylePen(Style))
-                {
-                    Rectangle borderRect = new Rectangle(0, 0, Width - 1, Height - 1);
-                    e.Graphics.DrawRectangle(p, borderRect);
-                    borderRect = new Rectangle(1, 1, Width - 3, Height - 3);
-                    e.Graphics.DrawRectangle(p, borderRect);
-                }
+                using Pen p = MetroPaint.GetStylePen(Style);
+                Rectangle borderRect = new(0, 0, Width - 1, Height - 1);
+                e.Graphics.DrawRectangle(p, borderRect);
+                borderRect = new Rectangle(1, 1, Width - 3, Height - 3);
+                e.Graphics.DrawRectangle(p, borderRect);
             }
 
-            TextRenderer.DrawText(e.Graphics, Text, MetroFonts.Button(metroButtonSize, metroButtonWeight), ClientRectangle, foreColor, MetroPaint.GetTextFormatFlags(TextAlign));
+            TextRenderer.DrawText(e.Graphics, Text, MetroFonts.Button(FontSize, FontWeight), ClientRectangle, foreColor, MetroPaint.GetTextFormatFlags(TextAlign));
 
             OnCustomPaintForeground(new MetroPaintEventArgs(Color.Empty, foreColor, e.Graphics));
 
-            if (displayFocusRectangle && isFocused)
+            if (DisplayFocus && isFocused)
                 ControlPaint.DrawFocusRectangle(e.Graphics, ClientRectangle);
         }
 

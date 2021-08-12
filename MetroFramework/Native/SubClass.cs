@@ -22,36 +22,28 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Runtime.InteropServices;
-using System.Windows.Forms;
 using System.Security;
+using System.Windows.Forms;
 
 namespace MetroFramework.Native
 {
     [SuppressUnmanagedCodeSecurity]
     internal class SubClass : NativeWindow
     {
-        public delegate int SubClassWndProcEventHandler(ref System.Windows.Forms.Message m);
+        public delegate int SubClassWndProcEventHandler(ref Message m);
         public event SubClassWndProcEventHandler SubClassedWndProc;
-        private bool IsSubClassed = false;
 
         public SubClass(IntPtr Handle, bool _SubClass)
         {
             base.AssignHandle(Handle);
-            this.IsSubClassed = _SubClass;
+            SubClassed = _SubClass;
         }
 
-        public bool SubClassed
-        {
-            get { return this.IsSubClassed; }
-            set { this.IsSubClassed = value; }
-        }
+        public bool SubClassed { get; set; } = false;
 
         protected override void WndProc(ref Message m)
         {
-            if (this.IsSubClassed)
+            if (SubClassed)
             {
                 if (OnSubClassedWndProc(ref m) != 0)
                     return;
@@ -68,7 +60,7 @@ namespace MetroFramework.Native
 
         public int HiWord(int Number)
         {
-            return ((Number >> 16) & 0xffff);
+            return (Number >> 16) & 0xffff;
         }
 
         #endregion
@@ -77,7 +69,7 @@ namespace MetroFramework.Native
 
         public int LoWord(int Number)
         {
-            return (Number & 0xffff);
+            return Number & 0xffff;
         }
 
         #endregion
@@ -102,12 +94,7 @@ namespace MetroFramework.Native
 
         private int OnSubClassedWndProc(ref Message m)
         {
-            if (SubClassedWndProc != null)
-            {
-                return this.SubClassedWndProc(ref m);
-            }
-
-            return 0;
+            return SubClassedWndProc != null ? SubClassedWndProc(ref m) : 0;
         }
     }
 }

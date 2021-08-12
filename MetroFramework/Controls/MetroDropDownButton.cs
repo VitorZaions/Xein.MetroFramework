@@ -1,6 +1,4 @@
-﻿
-using MetroFramework.Drawing;
-/**
+﻿/**
 * MetroFramework - Modern UI for WinForms
 * 
 * The MIT License (MIT)
@@ -23,14 +21,12 @@ using MetroFramework.Drawing;
 * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE 
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
+
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
-using System.Text;
 using System.Windows.Forms;
 using System.Windows.Forms.VisualStyles;
-
 
 // this control is adapted from SplitButton
 // http://wyday.com/splitbutton/
@@ -49,21 +45,19 @@ namespace MetroFramework.Controls
         #endregion
 
         #region Variables
+
         PushButtonState _state;
 
-
-
-        static int BorderSize = SystemInformation.Border3DSize.Width * 2;
+        static readonly int BorderSize = SystemInformation.Border3DSize.Width * 2;
         bool skipNextOpen;
         Rectangle dropDownRectangle;
         bool showSplit;
 
         bool isSplitMenuVisible;
 
-
         ContextMenuStrip m_SplitMenuStrip;
+        readonly TextFormatFlags textFormatFlags = TextFormatFlags.Default;
 
-        TextFormatFlags textFormatFlags = TextFormatFlags.Default;
         #endregion
 
         #region Constructor
@@ -167,7 +161,7 @@ namespace MetroFramework.Controls
 
             if (e.CloseReason == ToolStripDropDownCloseReason.AppClicked)
             {
-                skipNextOpen = (dropDownRectangle.Contains(PointToClient(Cursor.Position))) && MouseButtons == MouseButtons.Left;
+                skipNextOpen = dropDownRectangle.Contains(PointToClient(Cursor.Position)) && MouseButtons == MouseButtons.Left;
             }
         }
 
@@ -195,10 +189,7 @@ namespace MetroFramework.Controls
 
         protected override bool IsInputKey(Keys keyData)
         {
-            if (keyData.Equals(Keys.Down) && showSplit)
-                return true;
-
-            return base.IsInputKey(keyData);
+            return (keyData.Equals(Keys.Down) && showSplit) || base.IsInputKey(keyData);
         }
 
         protected override void OnGotFocus(EventArgs e)
@@ -365,12 +356,12 @@ namespace MetroFramework.Controls
 
             int internalBorder = BorderSize;
             Rectangle focusRect =
-                new Rectangle(internalBorder - 1,
+                new(internalBorder - 1,
                               internalBorder - 1,
                               bounds.Width - dropDownRectangle.Width - internalBorder,
                               bounds.Height - (internalBorder * 2) + 2);
 
-            bool drawSplitLine = (State == PushButtonState.Hot || State == PushButtonState.Pressed || !Application.RenderWithVisualStyles);
+            bool drawSplitLine = State == PushButtonState.Hot || State == PushButtonState.Pressed || !Application.RenderWithVisualStyles;
 
 
             if (RightToLeft == RightToLeft.Yes)
@@ -419,7 +410,7 @@ namespace MetroFramework.Controls
                     return CalculateButtonAutoSize();
 
                 if (!string.IsNullOrEmpty(Text) && TextRenderer.MeasureText(Text, Font).Width + SplitSectionWidth > preferredSize.Width)
-                    return preferredSize + new Size(SplitSectionWidth + BorderSize * 2, 0);
+                    return preferredSize + new Size(SplitSectionWidth + (BorderSize * 2), 0);
             }
 
             return preferredSize;
@@ -431,10 +422,8 @@ namespace MetroFramework.Controls
         private void PaintTextandImage(Graphics g, Rectangle bounds)
         {
             // Figure out where our text and image should go
-            Rectangle text_rectangle;
-            Rectangle image_rectangle;
 
-            CalculateButtonTextAndImageLayout(ref bounds, out text_rectangle, out image_rectangle);
+            CalculateButtonTextAndImageLayout(ref bounds, out Rectangle text_rectangle, out Rectangle image_rectangle);
 
             //draw the image
             if (Image != null)
@@ -444,16 +433,14 @@ namespace MetroFramework.Controls
                 else
                     ControlPaint.DrawImageDisabled(g, Image, image_rectangle.X, image_rectangle.Y, BackColor);
             }
-
-           
         }
 
         private void PaintArrow(Graphics g, Rectangle dropDownRect)
         {
-            Point middle = new Point(Convert.ToInt32(dropDownRect.Left + dropDownRect.Width / 2), Convert.ToInt32(dropDownRect.Top + dropDownRect.Height / 2));
+            Point middle = new(Convert.ToInt32(dropDownRect.Left + (dropDownRect.Width / 2)), Convert.ToInt32(dropDownRect.Top + (dropDownRect.Height / 2)));
 
             //if the width is odd - favor pushing it over one pixel right.
-            middle.X += (dropDownRect.Width % 2);
+            middle.X += dropDownRect.Width % 2;
 
             Point[] arrow = new[] { new Point(middle.X - 2, middle.Y - 1), new Point(middle.X + 3, middle.Y - 1), new Point(middle.X, middle.Y + 2) };
 
@@ -667,44 +654,30 @@ namespace MetroFramework.Controls
 
         private static HorizontalAlignment GetHorizontalAlignment(System.Drawing.ContentAlignment align)
         {
-            switch (align)
+            return align switch
             {
-                case System.Drawing.ContentAlignment.BottomLeft:
-                case System.Drawing.ContentAlignment.MiddleLeft:
-                case System.Drawing.ContentAlignment.TopLeft:
-                    return HorizontalAlignment.Left;
-                case System.Drawing.ContentAlignment.BottomCenter:
-                case System.Drawing.ContentAlignment.MiddleCenter:
-                case System.Drawing.ContentAlignment.TopCenter:
-                    return HorizontalAlignment.Center;
-                case System.Drawing.ContentAlignment.BottomRight:
-                case System.Drawing.ContentAlignment.MiddleRight:
-                case System.Drawing.ContentAlignment.TopRight:
-                    return HorizontalAlignment.Right;
-            }
-
-            return HorizontalAlignment.Left;
+                System.Drawing.ContentAlignment.BottomLeft or System.Drawing.ContentAlignment.MiddleLeft or System.Drawing.ContentAlignment.TopLeft
+                => HorizontalAlignment.Left,
+                System.Drawing.ContentAlignment.BottomCenter or System.Drawing.ContentAlignment.MiddleCenter or System.Drawing.ContentAlignment.TopCenter
+                => HorizontalAlignment.Center,
+                System.Drawing.ContentAlignment.BottomRight or System.Drawing.ContentAlignment.MiddleRight or System.Drawing.ContentAlignment.TopRight
+                => HorizontalAlignment.Right,
+                _ => HorizontalAlignment.Left,
+            };
         }
 
         private static VerticalAlignment GetVerticalAlignment(System.Drawing.ContentAlignment align)
         {
-            switch (align)
+            return align switch
             {
-                case System.Drawing.ContentAlignment.TopLeft:
-                case System.Drawing.ContentAlignment.TopCenter:
-                case System.Drawing.ContentAlignment.TopRight:
-                    return VerticalAlignment.Top;
-                case System.Drawing.ContentAlignment.MiddleLeft:
-                case System.Drawing.ContentAlignment.MiddleCenter:
-                case System.Drawing.ContentAlignment.MiddleRight:
-                    return VerticalAlignment.Center;
-                case System.Drawing.ContentAlignment.BottomLeft:
-                case System.Drawing.ContentAlignment.BottomCenter:
-                case System.Drawing.ContentAlignment.BottomRight:
-                    return VerticalAlignment.Bottom;
-            }
-
-            return VerticalAlignment.Top;
+                System.Drawing.ContentAlignment.TopLeft or System.Drawing.ContentAlignment.TopCenter or System.Drawing.ContentAlignment.TopRight
+                => VerticalAlignment.Top,
+                System.Drawing.ContentAlignment.MiddleLeft or System.Drawing.ContentAlignment.MiddleCenter or System.Drawing.ContentAlignment.MiddleRight
+                => VerticalAlignment.Center,
+                System.Drawing.ContentAlignment.BottomLeft or System.Drawing.ContentAlignment.BottomCenter or System.Drawing.ContentAlignment.BottomRight
+                => VerticalAlignment.Bottom,
+                _ => VerticalAlignment.Top,
+            };
         }
 
         internal static Rectangle AlignInRectangle(Rectangle outer, Size inner, System.Drawing.ContentAlignment align)
@@ -712,17 +685,17 @@ namespace MetroFramework.Controls
             int x = 0;
             int y = 0;
 
-            if (align == System.Drawing.ContentAlignment.BottomLeft || align == System.Drawing.ContentAlignment.MiddleLeft || align == System.Drawing.ContentAlignment.TopLeft)
+            if (align is System.Drawing.ContentAlignment.BottomLeft or System.Drawing.ContentAlignment.MiddleLeft or System.Drawing.ContentAlignment.TopLeft)
                 x = outer.X;
-            else if (align == System.Drawing.ContentAlignment.BottomCenter || align == System.Drawing.ContentAlignment.MiddleCenter || align == System.Drawing.ContentAlignment.TopCenter)
+            else if (align is System.Drawing.ContentAlignment.BottomCenter or System.Drawing.ContentAlignment.MiddleCenter or System.Drawing.ContentAlignment.TopCenter)
                 x = Math.Max(outer.X + ((outer.Width - inner.Width) / 2), outer.Left);
-            else if (align == System.Drawing.ContentAlignment.BottomRight || align == System.Drawing.ContentAlignment.MiddleRight || align == System.Drawing.ContentAlignment.TopRight)
+            else if (align is System.Drawing.ContentAlignment.BottomRight or System.Drawing.ContentAlignment.MiddleRight or System.Drawing.ContentAlignment.TopRight)
                 x = outer.Right - inner.Width;
-            if (align == System.Drawing.ContentAlignment.TopCenter || align == System.Drawing.ContentAlignment.TopLeft || align == System.Drawing.ContentAlignment.TopRight)
+            if (align is System.Drawing.ContentAlignment.TopCenter or System.Drawing.ContentAlignment.TopLeft or System.Drawing.ContentAlignment.TopRight)
                 y = outer.Y;
-            else if (align == System.Drawing.ContentAlignment.MiddleCenter || align == System.Drawing.ContentAlignment.MiddleLeft || align == System.Drawing.ContentAlignment.MiddleRight)
-                y = outer.Y + (outer.Height - inner.Height) / 2;
-            else if (align == System.Drawing.ContentAlignment.BottomCenter || align == System.Drawing.ContentAlignment.BottomRight || align == System.Drawing.ContentAlignment.BottomLeft)
+            else if (align is System.Drawing.ContentAlignment.MiddleCenter or System.Drawing.ContentAlignment.MiddleLeft or System.Drawing.ContentAlignment.MiddleRight)
+                y = outer.Y + ((outer.Height - inner.Height) / 2);
+            else if (align is System.Drawing.ContentAlignment.BottomCenter or System.Drawing.ContentAlignment.BottomRight or System.Drawing.ContentAlignment.BottomLeft)
                 y = outer.Bottom - inner.Height;
 
             return new Rectangle(x, y, Math.Min(inner.Width, outer.Width), Math.Min(inner.Height, outer.Height));
@@ -734,22 +707,9 @@ namespace MetroFramework.Controls
 
         private void SetButtonDrawState()
         {
-            if (Bounds.Contains(Parent.PointToClient(Cursor.Position)))
-            {
-                State = PushButtonState.Hot;
-            }
-            else if (Focused)
-            {
-                State = PushButtonState.Default;
-            }
-            else if (!Enabled)
-            {
-                State = PushButtonState.Disabled;
-            }
-            else
-            {
-                State = PushButtonState.Normal;
-            }
+            State = Bounds.Contains(Parent.PointToClient(Cursor.Position))
+                ? PushButtonState.Hot
+                : Focused ? PushButtonState.Default : !Enabled ? PushButtonState.Disabled : PushButtonState.Normal;
         }
 
         private Size CalculateButtonAutoSize()
@@ -784,8 +744,8 @@ namespace MetroFramework.Controls
             }
 
             // Pad the result
-            ret_size.Height += (Padding.Vertical + 6);
-            ret_size.Width += (Padding.Horizontal + 6);
+            ret_size.Height += Padding.Vertical + 6;
+            ret_size.Width += Padding.Horizontal + 6;
 
             //pad the splitButton arrow region
             if (showSplit)

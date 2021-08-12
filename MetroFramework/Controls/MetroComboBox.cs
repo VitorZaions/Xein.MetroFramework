@@ -21,17 +21,14 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE 
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-using System;
-using System.Drawing;
-using System.ComponentModel;
-using System.Windows.Forms;
-
 using MetroFramework.Components;
-using MetroFramework.Interfaces;
 using MetroFramework.Drawing;
-using System.Collections.Generic;
-using System.Windows.Forms.Design;
-using System.ComponentModel.Design;
+using MetroFramework.Interfaces;
+
+using System;
+using System.ComponentModel;
+using System.Drawing;
+using System.Windows.Forms;
 
 namespace MetroFramework.Controls
 {
@@ -40,7 +37,7 @@ namespace MetroFramework.Controls
     {
 
         #region Edit Control
-        private MetroTextBox textBox = new MetroTextBox();
+        private readonly MetroTextBox textBox = new();
         #endregion
 
         #region Interface
@@ -82,21 +79,11 @@ namespace MetroFramework.Controls
         {
             get
             {
-                if (DesignMode || metroStyle != MetroColorStyle.Default)
-                {
-                    return metroStyle;
-                }
-
-                if (StyleManager != null && metroStyle == MetroColorStyle.Default)
-                {
-                    return StyleManager.Style;
-                }
-                if (StyleManager == null && metroStyle == MetroColorStyle.Default)
-                {
-                    return MetroDefaults.Style;
-                }
-
-                return metroStyle;
+                return DesignMode || metroStyle != MetroColorStyle.Default
+                    ? metroStyle
+                    : StyleManager != null && metroStyle == MetroColorStyle.Default
+                    ? StyleManager.Style
+                    : StyleManager == null && metroStyle == MetroColorStyle.Default ? MetroDefaults.Style : metroStyle;
             }
             set { metroStyle = value; }
         }
@@ -108,60 +95,30 @@ namespace MetroFramework.Controls
         {
             get
             {
-                if (DesignMode || metroTheme != MetroThemeStyle.Default)
-                {
-                    return metroTheme;
-                }
-
-                if (StyleManager != null && metroTheme == MetroThemeStyle.Default)
-                {
-                    return StyleManager.Theme;
-                }
-                if (StyleManager == null && metroTheme == MetroThemeStyle.Default)
-                {
-                    return MetroDefaults.Theme;
-                }
-
-                return metroTheme;
+                return DesignMode || metroTheme != MetroThemeStyle.Default
+                    ? metroTheme
+                    : StyleManager != null && metroTheme == MetroThemeStyle.Default
+                    ? StyleManager.Theme
+                    : StyleManager == null && metroTheme == MetroThemeStyle.Default ? MetroDefaults.Theme : metroTheme;
             }
             set { metroTheme = value; }
         }
 
-        private MetroStyleManager metroStyleManager = null;
         [Browsable(false)]
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public MetroStyleManager StyleManager
-        {
-            get { return metroStyleManager; }
-            set { metroStyleManager = value; }
-        }
+        public MetroStyleManager StyleManager { get; set; } = null;
 
-        private bool useCustomBackColor = false;
         [DefaultValue(false)]
         [Category(MetroDefaults.PropertyCategory.Appearance)]
-        public bool UseCustomBackColor
-        {
-            get { return useCustomBackColor; }
-            set { useCustomBackColor = value; }
-        }
+        public bool UseCustomBackColor { get; set; } = false;
 
-        private bool useCustomForeColor = false;
         [DefaultValue(false)]
         [Category(MetroDefaults.PropertyCategory.Appearance)]
-        public bool UseCustomForeColor
-        {
-            get { return useCustomForeColor; }
-            set { useCustomForeColor = value; }
-        }
+        public bool UseCustomForeColor { get; set; } = false;
 
-        private bool useStyleColors = false;
         [DefaultValue(false)]
         [Category(MetroDefaults.PropertyCategory.Appearance)]
-        public bool UseStyleColors
-        {
-            get { return useStyleColors; }
-            set { useStyleColors = value; }
-        }
+        public bool UseStyleColors { get; set; } = false;
 
         [Browsable(false)]
         [Category(MetroDefaults.PropertyCategory.Behaviour)]
@@ -179,21 +136,16 @@ namespace MetroFramework.Controls
         public override string Text
         {
             get { return textBox.Text; }
-            set { textBox.Text = value; base.Text = textBox.Text;  OnTextChanged(EventArgs.Empty);  }
+            set { textBox.Text = value; base.Text = textBox.Text; OnTextChanged(EventArgs.Empty); }
         }
 
         #endregion
 
         #region Fields
 
-        private bool displayFocusRectangle = false;
         [DefaultValue(false)]
         [Category(MetroDefaults.PropertyCategory.Appearance)]
-        public bool DisplayFocus
-        {
-            get { return displayFocusRectangle; }
-            set { displayFocusRectangle = value; }
-        }
+        public bool DisplayFocus { get; set; } = false;
 
         [DefaultValue(DrawMode.OwnerDrawFixed)]
         [Browsable(false)]
@@ -219,31 +171,18 @@ namespace MetroFramework.Controls
                 // fake out the base
                 base.DropDownStyle = ComboBoxStyle.DropDownList;
                 // if we are a dropdown and have focus, then show the edit box
-                if ((value == ComboBoxStyle.DropDown) && (this.Focused))
-                    textBox.Visible = true;
-                else
-                    textBox.Visible = false;
+                textBox.Visible = (value == ComboBoxStyle.DropDown) && Focused;
                 Invalidate();
             }
         }
 
-        private MetroComboBoxSize metroComboBoxSize = MetroComboBoxSize.Medium;
         [DefaultValue(MetroComboBoxSize.Medium)]
         [Category(MetroDefaults.PropertyCategory.Appearance)]
-        public MetroComboBoxSize FontSize
-        {
-            get { return metroComboBoxSize; }
-            set { metroComboBoxSize = value; }
-        }
+        public MetroComboBoxSize FontSize { get; set; } = MetroComboBoxSize.Medium;
 
-        private MetroComboBoxWeight metroComboBoxWeight = MetroComboBoxWeight.Regular;
         [DefaultValue(MetroComboBoxWeight.Regular)]
         [Category(MetroDefaults.PropertyCategory.Appearance)]
-        public MetroComboBoxWeight FontWeight
-        {
-            get { return metroComboBoxWeight; }
-            set { metroComboBoxWeight = value; }
-        }
+        public MetroComboBoxWeight FontWeight { get; set; } = MetroComboBoxWeight.Regular;
 
         private string promptText = "";
         [Browsable(true)]
@@ -291,7 +230,7 @@ namespace MetroFramework.Controls
                     // if using autocomplete, then the source will be the item list.
                     textBox.AutoCompleteSource = AutoCompleteSource.CustomSource;
                     textBox.AutoCompleteCustomSource = new AutoCompleteStringCollection();
-                    foreach (object item in this.Items)
+                    foreach (object item in Items)
                     {
                         textBox.AutoCompleteCustomSource.Add(item.ToString());
                     }
@@ -307,13 +246,15 @@ namespace MetroFramework.Controls
         [Browsable(false)]
         public new AutoCompleteSource AutoCompleteSource
         {
-            get { return base.AutoCompleteSource; } set { base.AutoCompleteSource = value; }
+            get { return base.AutoCompleteSource; }
+            set { base.AutoCompleteSource = value; }
         }
 
         [Browsable(false)]
         public new AutoCompleteStringCollection AutoCompleteCustomSource
         {
-            get { return base.AutoCompleteCustomSource; } set { base.AutoCompleteCustomSource = value; }
+            get { return base.AutoCompleteCustomSource; }
+            set { base.AutoCompleteCustomSource = value; }
         }
 
         private bool isHovered = false;
@@ -334,31 +275,31 @@ namespace MetroFramework.Controls
 
             base.DrawMode = DrawMode.OwnerDrawFixed;
 
-            drawPrompt = (SelectedIndex == -1);
+            drawPrompt = SelectedIndex == -1;
 
             // setup the textbox
-            this.SuspendLayout();
-            textBox.Location = new System.Drawing.Point(0, 0);
-            textBox.FontSize = (MetroTextBoxSize)metroComboBoxSize;
-            textBox.FontWeight = (MetroTextBoxWeight)metroComboBoxWeight;
-            textBox.WaterMarkFont = MetroFonts.ComboBox(metroComboBoxSize, metroComboBoxWeight);
-            textBox.Size = this.Size;
+            SuspendLayout();
+            textBox.Location = new Point(0, 0);
+            textBox.FontSize = (MetroTextBoxSize)FontSize;
+            textBox.FontWeight = (MetroTextBoxWeight)FontWeight;
+            textBox.WaterMarkFont = MetroFonts.ComboBox(FontSize, FontWeight);
+            textBox.Size = Size;
             textBox.TabIndex = 0;
             textBox.Margin = new Padding(0);
             textBox.Padding = new Padding(0);
             textBox.TextAlign = HorizontalAlignment.Left;
             textBox.Resize += TextBox_Resize;
-            textBox.TextChanged +=  TextBox_TextChanged;
+            textBox.TextChanged += TextBox_TextChanged;
             textBox.UseSelectable = true;
             textBox.Enter += TextBox_Enter;
             textBox.Visible = false;
 
 
-            this.Controls.Add(textBox);
-            this.ResumeLayout(true);
-            this.AdjustControls();
+            Controls.Add(textBox);
+            ResumeLayout(true);
+            AdjustControls();
 
-                        
+
         }
 
 
@@ -371,11 +312,11 @@ namespace MetroFramework.Controls
             // if the list changes and we have autocomplete enabled, then we have to re-read the item list into the autocompletesource
             // we have to rebuild the autocomplete source here because we are running .net 2.0 and 
             // cannot use and observable on Items to know when it has changed
-            if (this.autoCompleteMode != AutoCompleteMode.None)
+            if (autoCompleteMode != AutoCompleteMode.None)
             {
                 textBox.AutoCompleteSource = AutoCompleteSource.CustomSource;
                 textBox.AutoCompleteCustomSource = new AutoCompleteStringCollection();
-               
+
                 for (int i = 0; i < Items.Count; i++)
                     textBox.AutoCompleteCustomSource.Add(GetItemText(Items[i]));
             }
@@ -388,7 +329,7 @@ namespace MetroFramework.Controls
 
         private void TextBox_TextChanged(object sender, EventArgs e)
         {
-            this.promptText = textBox.Text;
+            promptText = textBox.Text;
             OnTextChanged(e);
         }
         #endregion
@@ -407,7 +348,7 @@ namespace MetroFramework.Controls
             {
                 Color backColor = BackColor;
 
-                if (!useCustomBackColor)
+                if (!UseCustomBackColor)
                 {
                     backColor = MetroPaint.BackColor.Form(Theme);
                 }
@@ -438,7 +379,7 @@ namespace MetroFramework.Controls
                 }
 
                 OnCustomPaint(new MetroPaintEventArgs(Color.Empty, Color.Empty, e.Graphics));
-                
+
 
                 OnPaintForeground(e);
             }
@@ -475,29 +416,29 @@ namespace MetroFramework.Controls
                 borderColor = MetroPaint.BorderColor.ComboBox.Normal(Theme);
             }
 
-            using (Pen p = new Pen(borderColor))
+            using (Pen p = new(borderColor))
             {
-                Rectangle boxRect = new Rectangle(0, 0, Width - 1, Height - 1);
+                Rectangle boxRect = new(0, 0, Width - 1, Height - 1);
                 e.Graphics.DrawRectangle(p, boxRect);
             }
 
-  
+
             if (DropDownStyle != ComboBoxStyle.Simple)
             {
-                using (SolidBrush b = new SolidBrush(foreColor))
+                using (SolidBrush b = new(foreColor))
                 {
                     e.Graphics.FillPolygon(b, new Point[] { new Point(Width - 20, (Height / 2) - 2), new Point(Width - 9, (Height / 2) - 2), new Point(Width - 15, (Height / 2) + 4) });
                 }
 
-                Rectangle textRect = new Rectangle(2, 2, Width - 40, Height - 4);
+                Rectangle textRect = new(2, 2, Width - 40, Height - 4);
 
                 if (Enabled)
-                    TextRenderer.DrawText(e.Graphics, Text, MetroFonts.ComboBox(metroComboBoxSize, metroComboBoxWeight), textRect, foreColor, TextFormatFlags.Left | TextFormatFlags.VerticalCenter);
+                    TextRenderer.DrawText(e.Graphics, Text, MetroFonts.ComboBox(FontSize, FontWeight), textRect, foreColor, TextFormatFlags.Left | TextFormatFlags.VerticalCenter);
                 else
-                    ControlPaint.DrawStringDisabled(e.Graphics, Text, MetroFonts.ComboBox(metroComboBoxSize, metroComboBoxWeight), MetroPaint.ForeColor.ComboBox.Disabled(Theme), textRect, TextFormatFlags.Left | TextFormatFlags.VerticalCenter);
+                    ControlPaint.DrawStringDisabled(e.Graphics, Text, MetroFonts.ComboBox(FontSize, FontWeight), MetroPaint.ForeColor.ComboBox.Disabled(Theme), textRect, TextFormatFlags.Left | TextFormatFlags.VerticalCenter);
 
                 OnCustomPaintForeground(new MetroPaintEventArgs(Color.Empty, foreColor, e.Graphics));
-                if (displayFocusRectangle && isFocused)
+                if (DisplayFocus && isFocused)
                     ControlPaint.DrawFocusRectangle(e.Graphics, ClientRectangle);
 
                 if (drawPrompt)
@@ -505,7 +446,7 @@ namespace MetroFramework.Controls
                     DrawTextPrompt(e.Graphics);
                 }
             }
-            
+
 
 
         }
@@ -517,14 +458,14 @@ namespace MetroFramework.Controls
                 Color foreColor = MetroPaint.ForeColor.Link.Normal(Theme);
                 Color backColor = BackColor;
 
-                if (!useCustomBackColor)
+                if (!UseCustomBackColor)
                 {
                     backColor = MetroPaint.BackColor.Form(Theme);
                 }
 
                 if ((e.State & DrawItemState.Selected) == DrawItemState.Selected)
                 {
-                    using (SolidBrush b = new SolidBrush(MetroPaint.GetStyleColor(Style)))
+                    using (SolidBrush b = new(MetroPaint.GetStyleColor(Style)))
                     {
                         e.Graphics.FillRectangle(b, new Rectangle(e.Bounds.Left, e.Bounds.Top, e.Bounds.Width, e.Bounds.Height));
                     }
@@ -533,21 +474,19 @@ namespace MetroFramework.Controls
                 }
                 else
                 {
-                    using (SolidBrush b = new SolidBrush(backColor))
-                    {
-                        e.Graphics.FillRectangle(b, new Rectangle(e.Bounds.Left, e.Bounds.Top, e.Bounds.Width, e.Bounds.Height));
-                    }
+                    using SolidBrush b = new(backColor);
+                    e.Graphics.FillRectangle(b, new Rectangle(e.Bounds.Left, e.Bounds.Top, e.Bounds.Width, e.Bounds.Height));
                 }
 
-                if (this.DropDownStyle != ComboBoxStyle.DropDown)
+                if (DropDownStyle != ComboBoxStyle.DropDown)
                 {
-                    Rectangle textRect = new Rectangle(0, e.Bounds.Top, e.Bounds.Width, e.Bounds.Height);
-                    TextRenderer.DrawText(e.Graphics, GetItemText(Items[e.Index]), MetroFonts.ComboBox(metroComboBoxSize, metroComboBoxWeight), textRect, foreColor, TextFormatFlags.Left | TextFormatFlags.VerticalCenter);
+                    Rectangle textRect = new(0, e.Bounds.Top, e.Bounds.Width, e.Bounds.Height);
+                    TextRenderer.DrawText(e.Graphics, GetItemText(Items[e.Index]), MetroFonts.ComboBox(FontSize, FontWeight), textRect, foreColor, TextFormatFlags.Left | TextFormatFlags.VerticalCenter);
                 }
                 else
                 {
-                    Rectangle textRect = new Rectangle(0, e.Bounds.Top, this.textBox.Width, e.Bounds.Height);
-                    TextRenderer.DrawText(e.Graphics, GetItemText(Items[e.Index]), MetroFonts.ComboBox(metroComboBoxSize, metroComboBoxWeight), textRect, foreColor, TextFormatFlags.Left | TextFormatFlags.VerticalCenter);
+                    Rectangle textRect = new(0, e.Bounds.Top, textBox.Width, e.Bounds.Height);
+                    TextRenderer.DrawText(e.Graphics, GetItemText(Items[e.Index]), MetroFonts.ComboBox(FontSize, FontWeight), textRect, foreColor, TextFormatFlags.Left | TextFormatFlags.VerticalCenter);
                 }
             }
             else
@@ -558,23 +497,21 @@ namespace MetroFramework.Controls
 
         private void DrawTextPrompt()
         {
-
-            using (Graphics graphics = CreateGraphics())
-            {
-                DrawTextPrompt(graphics);
-            }
+            using Graphics graphics = CreateGraphics();
+            DrawTextPrompt(graphics);
         }
 
         private void DrawTextPrompt(Graphics g)
         {
             Color backColor = BackColor;
 
-            if (!useCustomBackColor)
+            if (!UseCustomBackColor)
             {
                 backColor = MetroPaint.BackColor.Form(Theme);
             }
-                Rectangle textRect = new Rectangle(2, 2, Width - 20, Height - 4);
-                TextRenderer.DrawText(g, promptText, MetroFonts.ComboBox(metroComboBoxSize, metroComboBoxWeight), textRect, SystemColors.GrayText, backColor, TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis);
+
+            Rectangle textRect = new(2, 2, Width - 20, Height - 4);
+            TextRenderer.DrawText(g, promptText, MetroFonts.ComboBox(FontSize, FontWeight), textRect, SystemColors.GrayText, backColor, TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis);
         }
 
         #endregion
@@ -585,7 +522,7 @@ namespace MetroFramework.Controls
         {
             isFocused = true;
             isHovered = true;
-            
+
             Invalidate();
 
             base.OnGotFocus(e);
@@ -596,7 +533,7 @@ namespace MetroFramework.Controls
             isFocused = false;
             isHovered = false;
             isPressed = false;
-            
+
             Invalidate();
 
             base.OnLostFocus(e);
@@ -610,7 +547,7 @@ namespace MetroFramework.Controls
 
             base.OnEnter(e);
 
-            
+
 
         }
 
@@ -711,7 +648,7 @@ namespace MetroFramework.Controls
             {
                 string measureText = Text.Length > 0 ? Text : "MeasureText";
                 proposedSize = new Size(int.MaxValue, int.MaxValue);
-                preferredSize = TextRenderer.MeasureText(g, measureText, MetroFonts.ComboBox(metroComboBoxSize, metroComboBoxWeight), proposedSize, TextFormatFlags.Left | TextFormatFlags.LeftAndRightPadding | TextFormatFlags.VerticalCenter);
+                preferredSize = TextRenderer.MeasureText(g, measureText, MetroFonts.ComboBox(FontSize, FontWeight), proposedSize, TextFormatFlags.Left | TextFormatFlags.LeftAndRightPadding | TextFormatFlags.VerticalCenter);
                 preferredSize.Height += 4;
             }
 
@@ -721,7 +658,7 @@ namespace MetroFramework.Controls
         protected override void OnSelectedIndexChanged(EventArgs e)
         {
             base.OnSelectedIndexChanged(e);
-            drawPrompt = (SelectedIndex == -1);
+            drawPrompt = SelectedIndex == -1;
             Invalidate();
         }
 
@@ -732,7 +669,7 @@ namespace MetroFramework.Controls
         {
             base.WndProc(ref m);
 
-            if (((m.Msg == WM_PAINT) || (m.Msg == OCM_COMMAND)) && (drawPrompt))
+            if (((m.Msg == WM_PAINT) || (m.Msg == OCM_COMMAND)) && drawPrompt)
             {
                 DrawTextPrompt();
             }
@@ -746,16 +683,16 @@ namespace MetroFramework.Controls
             if (DropDownStyle == ComboBoxStyle.DropDownList)
                 return;
 
-            this.SuspendLayout();
+            SuspendLayout();
             textBox.Width = ClientRectangle.Width - 26;
             textBox.Height = ClientRectangle.Height;
-            this.ResumeLayout();
-            this.Invalidate(false);
+            ResumeLayout();
+            Invalidate(false);
         }
 
-       
+
         #endregion
     }
 
-   
+
 }

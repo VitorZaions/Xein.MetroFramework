@@ -24,9 +24,6 @@
  * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF 
  * THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Drawing;
 
 namespace MetroFramework.Drawing.Html
@@ -34,11 +31,7 @@ namespace MetroFramework.Drawing.Html
     public class CssRectangle
     {
         #region Fields
-        private float _left;
-        private float _top;
-        private float _width;
-        private float _height;        
-        
+
 
         #endregion
 
@@ -49,38 +42,22 @@ namespace MetroFramework.Drawing.Html
         /// <summary>
         /// Left of the rectangle
         /// </summary>
-        public float Left
-        {
-            get { return _left; }
-            set { _left = value; }
-        }
+        public float Left { get; set; }
 
         /// <summary>
         /// Top of the rectangle
         /// </summary>
-        public float Top
-        {
-            get { return _top; }
-            set { _top = value; }
-        }
+        public float Top { get; set; }
 
         /// <summary>
         /// Width of the rectangle
         /// </summary>
-        public float Width
-        {
-            get { return _width; }
-            set { _width = value; }
-        }
+        public float Width { get; set; }
 
         /// <summary>
         /// Height of the rectangle
         /// </summary>
-        public float Height
-        {
-            get { return _height; }
-            set { _height = value; }
-        }
+        public float Height { get; set; }
 
         /// <summary>
         /// Gets or sets the right of the rectangle. When setting, it only affects the Width of the rectangle.

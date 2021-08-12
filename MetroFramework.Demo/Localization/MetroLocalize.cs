@@ -78,7 +78,7 @@ namespace MetroFramework.Localization
 
             if (xmlStream != null)
             {
-                DataSet importDataset = new DataSet();
+                DataSet importDataset = new();
                 importDataset.ReadXml(xmlStream);
 
                 languageDataset.Merge(importDataset);
@@ -88,15 +88,12 @@ namespace MetroFramework.Localization
 
         private string convertVar(object var)
         {
-            if (var == null)
-                return "";
-
-            return var.ToString();
+            return var == null ? "" : var.ToString();
         }
 
         public string translate(string key)
         {
-            if ((string.IsNullOrEmpty(key))) {
+            if (string.IsNullOrEmpty(key)) {
                 return "";
             }
 
@@ -109,12 +106,7 @@ namespace MetroFramework.Localization
             }
 
             DataRow[] languageRows = languageDataset.Tables["Localization"].Select("Key='" + key + "'");
-            if (languageRows.Length <= 0)
-            {
-                return "~" + key;
-            }
-
-            return languageRows[0]["Value"].ToString();
+            return languageRows.Length <= 0 ? "~" + key : languageRows[0]["Value"].ToString();
         }
 
         public string translate(string key, object var1)

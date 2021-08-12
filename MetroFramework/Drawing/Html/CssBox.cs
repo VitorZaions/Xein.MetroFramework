@@ -26,13 +26,11 @@
  */
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.ComponentModel;
-using System.Windows.Forms;
+using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Reflection;
 using System.Text.RegularExpressions;
-using System.Drawing.Drawing2D;
-using System.Drawing;
 
 namespace MetroFramework.Drawing.Html
 {
@@ -63,17 +61,17 @@ namespace MetroFramework.Drawing.Html
         /// <summary>
         /// Dictionary of default values
         /// </summary>
-        private static Dictionary<string, string> _defaults;
+        private static readonly Dictionary<string, string> _defaults;
 
         /// <summary>
         /// Hosts all inhertiable properties
         /// </summary>
-        private static List<PropertyInfo> _inheritables;
+        private static readonly List<PropertyInfo> _inheritables;
 
         /// <summary>
         /// Hosts css properties
         /// </summary>
-        private static List<PropertyInfo> _cssproperties;
+        private static readonly List<PropertyInfo> _cssproperties;
 
         /// <summary>
         /// Static constructor and initialization
@@ -81,7 +79,7 @@ namespace MetroFramework.Drawing.Html
         static CssBox()
         {
             #region Initialize _properties, _inheritables and _defaults Dictionaries
-            
+
             _properties = new Dictionary<string, PropertyInfo>();
             _defaults = new Dictionary<string, string>();
             _inheritables = new List<PropertyInfo>();
@@ -90,26 +88,22 @@ namespace MetroFramework.Drawing.Html
             PropertyInfo[] props = typeof(CssBox).GetProperties();
             for (int i = 0; i < props.Length; i++)
             {
-                CssPropertyAttribute att = Attribute.GetCustomAttribute(props[i], typeof(CssPropertyAttribute)) as CssPropertyAttribute;
-
-                if (att != null)
+                if (Attribute.GetCustomAttribute(props[i], typeof(CssPropertyAttribute)) is CssPropertyAttribute att)
                 {
                     _properties.Add(att.Name, props[i]);
                     _defaults.Add(att.Name, GetDefaultValue(props[i]));
                     _cssproperties.Add(props[i]);
 
-                    CssPropertyInheritedAttribute inh = Attribute.GetCustomAttribute(props[i], typeof(CssPropertyInheritedAttribute)) as CssPropertyInheritedAttribute;
-
-                    if (inh != null)
+                    if (Attribute.GetCustomAttribute(props[i], typeof(CssPropertyInheritedAttribute)) is CssPropertyInheritedAttribute _)
                     {
                         _inheritables.Add(props[i]);
                     }
                 }
-            } 
+            }
             #endregion
 
             Empty = new CssBox();
-            
+
         }
 
         /// <summary>
@@ -119,9 +113,7 @@ namespace MetroFramework.Drawing.Html
         /// <returns></returns>
         private static string GetDefaultValue(PropertyInfo prop)
         {
-            DefaultValueAttribute att = Attribute.GetCustomAttribute(prop, typeof(DefaultValueAttribute)) as DefaultValueAttribute;
-
-            if (att == null) return string.Empty;
+            if (Attribute.GetCustomAttribute(prop, typeof(DefaultValueAttribute)) is not DefaultValueAttribute att) return string.Empty;
 
             string s = Convert.ToString(att.Value);
 
@@ -132,76 +124,29 @@ namespace MetroFramework.Drawing.Html
 
         #region CSS Fields
 
-        private string _backgroundColor;
-        private string _backgroundGradient;
-        private string _backgroundGradientAngle;
-        private string _BackgroundImage;
-        private string _backgroundRepeat;
-        private string _borderTopWidth;
-        private string _borderRightWidth;
-        private string _borderBottomWidth;
-        private string _borderLeftWidth;
         private string _borderWidth;
-        private string _borderTopColor;
-        private string _borderRightColor;
-        private string _borderBottomColor;
-        private string _borderLeftColor;
         private string _borderColor;
-        private string _borderTopStyle;
-        private string _borderRightStyle;
-        private string _borderBottomStyle;
-        private string _borderLeftStyle;
         private string _borderStyle;
         private string _borderBottom;
         private string _borderLeft;
         private string _borderRight;
         private string _borderTop;
-        private string _borderSpacing;
-        private string _borderCollapse;
         private string _border;
         private string _color;
-        private string _cornerNWRadius;
-        private string _cornerNERadius;
-        private string _cornerSERadius;
-        private string _cornerSWRadius;
         private string _cornerRadius;
-        private string _emptyCells;
-        private string _direction;
-        private string _display;
         private string _font;
         private string _fontFamily;
         private string _fontSize;
-        private string _fontStyle;
-        private string _fontVariant;
-        private string _fontWeight;
-        private string _float;
-        private string _height;
-        private string _marginBottom;
-        private string _marginLeft;
-        private string _marginRight;
-        private string _marginTop;
         private string _margin;
-        private string _left;
         private string _lineHeight;
-        private string _listStyleType;
-        private string _listStyleImage;
-        private string _listStylePosition;
-        private string _listStyle;
         private string _paddingLeft;
         private string _paddingBottom;
         private string _paddingRight;
         private string _paddingTop;
         private string _padding;
         private string _text;
-        private string _textAlign;
-        private string _textDecoration;
         private string _textIndent;
-        private string _top;
-        private string _position;
-        private string _verticalAlign;
-        private string _width;
         private string _wordSpacing;
-        private string _whiteSpace;
 
         #endregion
 
@@ -214,24 +159,14 @@ namespace MetroFramework.Drawing.Html
         /// Flag that indicates that CssTable algorithm already made fixes on it.
         /// </remarks>
         internal bool TableFixed;
-
-        private List<CssBoxWord> _boxWords;
-        private List<CssBox> _boxes;
         private CssBox _parentBox;
         private bool _wordsSizeMeasured;
         private SizeF _size;
         private PointF _location;
-        private List<CssLineBox> _lineBoxes;
-        private List<CssLineBox> _parentLineBoxes;
         private float _fontAscent = float.NaN;
         private float _fontDescent = float.NaN;
         private float _fontLineSpacing = float.NaN;
-        private HtmlTag _htmltag;
-        private Dictionary<CssLineBox, RectangleF> _rectangles = null;
         protected InitialContainer _initialContainer = null;
-        private CssBox _listItemBox;
-        private CssLineBox _firstHostingLineBox;
-        private CssLineBox _lastHostingLineBox;
 
         #endregion
 
@@ -239,11 +174,11 @@ namespace MetroFramework.Drawing.Html
 
         protected CssBox()
         {
-            _boxWords = new List<CssBoxWord>();
-            _boxes = new List<CssBox>();
-            _lineBoxes = new List<CssLineBox>();
-            _parentLineBoxes = new List<CssLineBox>();
-            _rectangles = new Dictionary<CssLineBox, RectangleF>();
+            Words = new List<CssBoxWord>();
+            Boxes = new List<CssBox>();
+            LineBoxes = new List<CssLineBox>();
+            ParentLineBoxes = new List<CssLineBox>();
+            Rectangles = new Dictionary<CssLineBox, RectangleF>();
 
             #region Initialize properties with default values
 
@@ -264,7 +199,7 @@ namespace MetroFramework.Drawing.Html
         internal CssBox(CssBox parentBox, HtmlTag tag)
             : this(parentBox)
         {
-            _htmltag = tag;
+            HtmlTag = tag;
         }
 
         #endregion
@@ -279,35 +214,19 @@ namespace MetroFramework.Drawing.Html
 
         [CssProperty("border-bottom-width")]
         [DefaultValue("medium")]
-        public string BorderBottomWidth
-        {
-            get { return _borderBottomWidth; }
-            set { _borderBottomWidth = value; }
-        }
+        public string BorderBottomWidth { get; set; }
 
         [CssProperty("border-left-width")]
         [DefaultValue("medium")]
-        public string BorderLeftWidth
-        {
-            get { return _borderLeftWidth; }
-            set { _borderLeftWidth = value; }
-        }
+        public string BorderLeftWidth { get; set; }
 
         [CssProperty("border-right-width")]
         [DefaultValue("medium")]
-        public string BorderRightWidth
-        {
-            get { return _borderRightWidth; }
-            set { _borderRightWidth = value; }
-        }
+        public string BorderRightWidth { get; set; }
 
         [CssProperty("border-top-width")]
         [DefaultValue("medium")]
-        public string BorderTopWidth
-        {
-            get { return _borderTopWidth; }
-            set { _borderTopWidth = value; }
-        }
+        public string BorderTopWidth { get; set; }
 
         [CssProperty("border-width")]
         [DefaultValue("")]
@@ -353,28 +272,16 @@ namespace MetroFramework.Drawing.Html
 
         [CssProperty("border-bottom-style")]
         [DefaultValue("none")]
-        public string BorderBottomStyle
-        {
-            get { return _borderBottomStyle; }
-            set { _borderBottomStyle = value; }
-        }
+        public string BorderBottomStyle { get; set; }
 
 
         [CssProperty("border-left-style")]
         [DefaultValue("none")]
-        public string BorderLeftStyle
-        {
-            get { return _borderLeftStyle; }
-            set { _borderLeftStyle = value; }
-        }
+        public string BorderLeftStyle { get; set; }
 
         [CssProperty("border-right-style")]
         [DefaultValue("none")]
-        public string BorderRightStyle
-        {
-            get { return _borderRightStyle; }
-            set { _borderRightStyle = value; }
-        }
+        public string BorderRightStyle { get; set; }
 
         [CssProperty("border-style")]
         [DefaultValue("")]
@@ -416,11 +323,7 @@ namespace MetroFramework.Drawing.Html
 
         [CssProperty("border-top-style")]
         [DefaultValue("none")]
-        public string BorderTopStyle
-        {
-            get { return _borderTopStyle; }
-            set { _borderTopStyle = value; }
-        }
+        public string BorderTopStyle { get; set; }
         #endregion
 
         #region Border Color
@@ -433,7 +336,7 @@ namespace MetroFramework.Drawing.Html
             set
             {
                 _borderColor = value;
-                
+
                 MatchCollection colors = Parser.Match(Parser.CssColors, value);
 
                 string[] values = new string[colors.Count];
@@ -469,35 +372,19 @@ namespace MetroFramework.Drawing.Html
 
         [CssProperty("border-bottom-color")]
         [DefaultValue("black")]
-        public string BorderBottomColor
-        {
-            get { return _borderBottomColor; }
-            set { _borderBottomColor = value; }
-        }
+        public string BorderBottomColor { get; set; }
 
         [CssProperty("border-left-color")]
         [DefaultValue("black")]
-        public string BorderLeftColor
-        {
-            get { return _borderLeftColor; }
-            set { _borderLeftColor = value; }
-        }
+        public string BorderLeftColor { get; set; }
 
         [CssProperty("border-right-color")]
         [DefaultValue("black")]
-        public string BorderRightColor
-        {
-            get { return _borderRightColor; }
-            set { _borderRightColor = value; }
-        }
+        public string BorderRightColor { get; set; }
 
         [CssProperty("border-top-color")]
         [DefaultValue("black")]
-        public string BorderTopColor
-        {
-            get { return _borderTopColor; }
-            set { _borderTopColor = value; }
-        }
+        public string BorderTopColor { get; set; }
 
         #endregion
 
@@ -507,8 +394,8 @@ namespace MetroFramework.Drawing.Html
         public string Border
         {
             get { return _border; }
-            set 
-            { 
+            set
+            {
                 _border = value;
 
                 string borderWidth = Parser.Search(Parser.CssBorderWidth, value);
@@ -604,20 +491,12 @@ namespace MetroFramework.Drawing.Html
         [CssProperty("border-spacing")]
         [DefaultValue("0")]
         [CssPropertyInherited()]
-        public string BorderSpacing
-        {
-            get { return _borderSpacing; }
-            set { _borderSpacing = value; }
-        }
+        public string BorderSpacing { get; set; }
 
         [CssProperty("border-collapse")]
         [DefaultValue("separate")]
         [CssPropertyInherited()]
-        public string BorderCollapse
-        {
-            get { return _borderCollapse; }
-            set { _borderCollapse = value; }
-        }
+        public string BorderCollapse { get; set; }
 
 
         #endregion
@@ -629,7 +508,7 @@ namespace MetroFramework.Drawing.Html
         public string CornerRadius
         {
             get { return _cornerRadius; }
-            set 
+            set
             {
                 MatchCollection r = Parser.Match(Parser.CssLength, value);
 
@@ -660,42 +539,26 @@ namespace MetroFramework.Drawing.Html
                         break;
                 }
 
-                _cornerRadius = value; 
+                _cornerRadius = value;
             }
         }
 
 
         [CssProperty("corner-nw-radius")]
         [DefaultValue("0")]
-        public string CornerNWRadius
-        {
-            get { return _cornerNWRadius; }
-            set { _cornerNWRadius = value; }
-        }
+        public string CornerNWRadius { get; set; }
 
         [CssProperty("corner-ne-radius")]
         [DefaultValue("0")]
-        public string CornerNERadius
-        {
-            get { return _cornerNERadius; }
-            set { _cornerNERadius = value; }
-        }
+        public string CornerNERadius { get; set; }
 
         [CssProperty("corner-se-radius")]
         [DefaultValue("0")]
-        public string CornerSERadius
-        {
-            get { return _cornerSERadius; }
-            set { _cornerSERadius = value; }
-        }
+        public string CornerSERadius { get; set; }
 
         [CssProperty("corner-sw-radius")]
         [DefaultValue("0")]
-        public string CornerSWRadius
-        {
-            get { return _cornerSWRadius; }
-            set { _cornerSWRadius = value; }
-        }
+        public string CornerSWRadius { get; set; }
 
 
         #endregion
@@ -742,35 +605,19 @@ namespace MetroFramework.Drawing.Html
 
         [CssProperty("margin-bottom")]
         [DefaultValue("0")]
-        public string MarginBottom
-        {
-            get { return _marginBottom; }
-            set { _marginBottom = value; }
-        }
+        public string MarginBottom { get; set; }
 
         [CssProperty("margin-left")]
         [DefaultValue("0")]
-        public string MarginLeft
-        {
-            get { return _marginLeft; }
-            set { _marginLeft = value; }
-        }
+        public string MarginLeft { get; set; }
 
         [CssProperty("margin-right")]
         [DefaultValue("0")]
-        public string MarginRight
-        {
-            get { return _marginRight; }
-            set { _marginRight = value; }
-        }
+        public string MarginRight { get; set; }
 
         [CssProperty("margin-top")]
         [DefaultValue("0")]
-        public string MarginTop
-        {
-            get { return _marginTop; }
-            set { _marginTop = value; }
-        }
+        public string MarginTop { get; set; }
 
         #endregion
 
@@ -849,19 +696,11 @@ namespace MetroFramework.Drawing.Html
 
         [CssProperty("left")]
         [DefaultValue("auto")]
-        public string Left
-        {
-            get { return _left; }
-            set { _left = value; }
-        }
+        public string Left { get; set; }
 
         [CssProperty("top")]
         [DefaultValue("auto")]
-        public string Top
-        {
-            get { return _top; }
-            set { _top = value; }
-        }
+        public string Top { get; set; }
 
         //[CssProperty("right")]
         //[DefaultValue("auto")]
@@ -881,19 +720,11 @@ namespace MetroFramework.Drawing.Html
 
         [CssProperty("width")]
         [DefaultValue("auto")]
-        public string Width
-        {
-            get { return _width; }
-            set { _width = value; }
-        }
+        public string Width { get; set; }
 
         [CssProperty("height")]
         [DefaultValue("auto")]
-        public string Height
-        {
-            get { return _height; }
-            set { _height = value; }
-        }
+        public string Height { get; set; }
 
 
         #endregion
@@ -904,43 +735,23 @@ namespace MetroFramework.Drawing.Html
 
         [CssProperty("background-color")]
         [DefaultValue("transparent")]
-        public string BackgroundColor
-        {
-            get { return _backgroundColor; }
-            set { _backgroundColor = value; }
-        }
+        public string BackgroundColor { get; set; }
 
         [CssProperty("background-image")]
         [DefaultValue("none")]
-        public string BackgroundImage
-        {
-            get { return _BackgroundImage; }
-            set { _BackgroundImage = value; }
-        }
+        public string BackgroundImage { get; set; }
 
         [CssProperty("background-repeat")]
         [DefaultValue("repeat")]
-        public string BackgroundRepeat
-        {
-            get { return _backgroundRepeat; }
-            set { _backgroundRepeat = value; }
-        }
+        public string BackgroundRepeat { get; set; }
 
         [CssProperty("background-gradient")]
         [DefaultValue("none")]
-        public string BackgroundGradient
-        {
-            get { return _backgroundGradient; }
-            set { _backgroundGradient = value; }
-        }
+        public string BackgroundGradient { get; set; }
 
         [CssProperty("background-gradient-angle")]
         [DefaultValue("90")]
-        public string BackgroundGradientAngle
-        {
-            get { return _backgroundGradientAngle; }
-            set { _backgroundGradientAngle = value; }
-        }
+        public string BackgroundGradientAngle { get; set; }
 
         [CssProperty("color")]
         [DefaultValue("black")]
@@ -953,46 +764,26 @@ namespace MetroFramework.Drawing.Html
 
         [CssProperty("display")]
         [DefaultValue("inline")]
-        public string Display
-        {
-            get { return _display; }
-            set { _display = value; }
-        }
+        public string Display { get; set; }
 
         [CssProperty("direction")]
         [DefaultValue("ltr")]
-        public string Direction
-        {
-            get { return _direction; }
-            set { _direction = value; }
-        }
+        public string Direction { get; set; }
 
 
         [CssProperty("empty-cells")]
         [DefaultValue("show")]
         [CssPropertyInherited()]
-        public string EmptyCells
-        {
-            get { return _emptyCells; }
-            set { _emptyCells = value; }
-        }
+        public string EmptyCells { get; set; }
 
 
         [CssProperty("float")]
         [DefaultValue("none")]
-        public string Float
-        {
-            get { return _float; }
-            set { _float = value; }
-        }
+        public string Float { get; set; }
 
         [CssProperty("position")]
         [DefaultValue("static")]
-        public string Position
-        {
-            get { return _position; }
-            set { _position = value; }
-        } 
+        public string Position { get; set; }
         #endregion
 
         #region Text
@@ -1009,11 +800,7 @@ namespace MetroFramework.Drawing.Html
         [CssProperty("vertical-align")]
         [DefaultValue("baseline")]
         [CssPropertyInherited()]
-        public string VerticalAlign
-        {
-            get { return _verticalAlign; }
-            set { _verticalAlign = value; }
-        }
+        public string VerticalAlign { get; set; }
 
         [CssProperty("text-indent")]
         [DefaultValue("0")]
@@ -1027,28 +814,16 @@ namespace MetroFramework.Drawing.Html
         [CssProperty("text-align")]
         [DefaultValue("")]
         [CssPropertyInherited()]
-        public string TextAlign
-        {
-            get { return _textAlign; }
-            set { _textAlign = value; }
-        }
+        public string TextAlign { get; set; }
 
         [CssProperty("text-decoration")]
         [DefaultValue("")]
-        public string TextDecoration
-        {
-            get { return _textDecoration; }
-            set { _textDecoration = value; }
-        }
+        public string TextDecoration { get; set; }
 
         [CssProperty("white-space")]
         [DefaultValue("normal")]
         [CssPropertyInherited()]
-        public string WhiteSpace
-        {
-            get { return _whiteSpace; }
-            set { _whiteSpace = value; }
-        }
+        public string WhiteSpace { get; set; }
 
 
         [CssProperty("word-spacing")]
@@ -1069,12 +844,11 @@ namespace MetroFramework.Drawing.Html
         public string Font
         {
             get { return _font; }
-            set 
-            { 
+            set
+            {
                 _font = value;
 
-                int mustBePos;
-                string mustBe = Parser.Search(Parser.CssFontSizeAndLineHeight, value, out mustBePos);
+                string mustBe = Parser.Search(Parser.CssFontSizeAndLineHeight, value, out int mustBePos);
 
                 if (!string.IsNullOrEmpty(mustBe))
                 {
@@ -1086,7 +860,7 @@ namespace MetroFramework.Drawing.Html
                     string fontWeight = Parser.Search(Parser.CssFontWeight, leftSide);
 
                     //Check for family on the right
-                    string rightSide = value.Substring(mustBePos + mustBe.Length);
+                    string rightSide = value[(mustBePos + mustBe.Length)..];
                     string fontFamily = rightSide.Trim(); //Parser.Search(Parser.CssFontFamily, rightSide); //TODO: Would this be right?
 
                     //Check for font-size and line-height
@@ -1097,7 +871,7 @@ namespace MetroFramework.Drawing.Html
                     {
                         int slashPos = mustBe.IndexOf("/");
                         fontSize = mustBe.Substring(0, slashPos);
-                        lineHeight = mustBe.Substring(slashPos + 1);
+                        lineHeight = mustBe[(slashPos + 1)..];
                     }
 
                     //Assign values p { font: 12px/14px sans-serif }
@@ -1122,28 +896,22 @@ namespace MetroFramework.Drawing.Html
         public string FontFamily
         {
             get { return _fontFamily; }
-            set 
+            set
             {
 
                 ///HACK: Because of performance, generic font families
                 ///      will be checked when only the generic font 
                 ///      family is given.
 
-                switch (value)
+                _fontFamily = value switch
                 {
-                    case CssConstants.Serif:
-                        _fontFamily = CssDefaults.FontSerif; break;
-                    case CssConstants.SansSerif:
-                        _fontFamily = CssDefaults.FontSansSerif; break;
-                    case CssConstants.Cursive:
-                        _fontFamily = CssDefaults.FontCursive; break;
-                    case CssConstants.Fantasy:
-                        _fontFamily = CssDefaults.FontFantasy; break;
-                    case CssConstants.Monospace:
-                        _fontFamily = CssDefaults.FontMonospace; break;
-                    default:
-                        _fontFamily = value; break;
-                }
+                    CssConstants.Serif => CssDefaults.FontSerif,
+                    CssConstants.SansSerif => CssDefaults.FontSansSerif,
+                    CssConstants.Cursive => CssDefaults.FontCursive,
+                    CssConstants.Fantasy => CssDefaults.FontFantasy,
+                    CssConstants.Monospace => CssDefaults.FontMonospace,
+                    _ => value,
+                };
             }
         }
 
@@ -1153,27 +921,19 @@ namespace MetroFramework.Drawing.Html
         public string FontSize
         {
             get { return _fontSize; }
-            set 
+            set
             {
                 string length = Parser.Search(Parser.CssLength, value);
 
                 if (length != null)
                 {
-                    string computedValue = string.Empty;
-                    CssLength len = new CssLength(length);
+                    CssLength len = new(length);
 
-                    if (len.HasError)
-                    {
-                        computedValue = _defaults["font-size"];
-                    }
-                    else if (len.Unit == CssLength.CssUnit.Ems && ParentBox != null)
-                    {
-                        computedValue = len.ConvertEmToPoints(ParentBox.ActualFont.SizeInPoints).ToString();
-                    }
-                    else
-                    {
-                        computedValue = len.ToString();
-                    }
+                    string computedValue = len.HasError
+    ? _defaults["font-size"]
+    : len.Unit == CssLength.CssUnit.Ems && ParentBox != null
+        ? len.ConvertEmToPoints(ParentBox.ActualFont.SizeInPoints).ToString()
+        : len.ToString();
 
                     _fontSize = computedValue;
                 }
@@ -1188,30 +948,18 @@ namespace MetroFramework.Drawing.Html
         [CssProperty("font-style")]
         [DefaultValue("normal")]
         [CssPropertyInherited()]
-        public string FontStyle
-        {
-            get { return _fontStyle; }
-            set { _fontStyle = value; }
-        }
+        public string FontStyle { get; set; }
 
         [CssProperty("font-variant")]
         [DefaultValue("normal")]
         [CssPropertyInherited()]
-        public string FontVariant
-        {
-            get { return _fontVariant; }
-            set { _fontVariant = value; }
-        }
+        public string FontVariant { get; set; }
 
 
         [CssProperty("font-weight")]
         [DefaultValue("normal")]
         [CssPropertyInherited()]
-        public string FontWeight
-        {
-            get { return _fontWeight; }
-            set { _fontWeight = value; }
-        }
+        public string FontWeight { get; set; }
 
 
         #endregion
@@ -1221,38 +969,22 @@ namespace MetroFramework.Drawing.Html
         [CssProperty("list-style")]
         [DefaultValue("")]
         [CssPropertyInherited()]
-        public string ListStyle
-        {
-            get { return _listStyle; }
-            set { _listStyle = value; }
-        }
+        public string ListStyle { get; set; }
 
         [CssProperty("list-style-position")]
         [DefaultValue("outside")]
         [CssPropertyInherited()]
-        public string ListStylePosition
-        {
-            get { return _listStylePosition; }
-            set { _listStylePosition = value; }
-        }
+        public string ListStylePosition { get; set; }
 
         [CssProperty("list-style-image")]
         [DefaultValue("")]
         [CssPropertyInherited()]
-        public string ListStyleImage
-        {
-            get { return _listStyleImage; }
-            set { _listStyleImage = value; }
-        }
+        public string ListStyleImage { get; set; }
 
         [CssProperty("list-style-type")]
         [DefaultValue("disc")]
         [CssPropertyInherited()]
-        public string ListStyleType
-        {
-            get { return _listStyleType; }
-            set { _listStyleType = value; }
-        }
+        public string ListStyleType { get; set; }
 
 
         #endregion
@@ -1271,7 +1003,7 @@ namespace MetroFramework.Drawing.Html
         private float _actualPaddingTop = float.NaN;
         private float _actualPaddingBottom = float.NaN;
         private float _actualPaddingRight = float.NaN;
-        private float _actualPaddingLeft = float.NaN; 
+        private float _actualPaddingLeft = float.NaN;
         private float _actualMarginTop = float.NaN;
         private float _actualMarginBottom = float.NaN;
         private float _actualMarginRight = float.NaN;
@@ -1281,10 +1013,10 @@ namespace MetroFramework.Drawing.Html
         private float _actualBorderBottomWidth = float.NaN;
         private float _actualBorderRightWidth = float.NaN;
         private Color _actualBackgroundGradient = System.Drawing.Color.Empty;
-        private System.Drawing.Color _actualBorderTopColor = System.Drawing.Color.Empty;
-        private System.Drawing.Color _actualBorderLeftColor = System.Drawing.Color.Empty;
-        private System.Drawing.Color _actualBorderBottomColor = System.Drawing.Color.Empty;
-        private System.Drawing.Color _actualBorderRightColor = System.Drawing.Color.Empty;
+        private Color _actualBorderTopColor = System.Drawing.Color.Empty;
+        private Color _actualBorderLeftColor = System.Drawing.Color.Empty;
+        private Color _actualBorderBottomColor = System.Drawing.Color.Empty;
+        private Color _actualBorderRightColor = System.Drawing.Color.Empty;
         private float _actualWordSpacing = float.NaN;
         private Color _actualBackgroundColor = System.Drawing.Color.Empty;
         private Font _actualFont = null;
@@ -1532,7 +1264,7 @@ namespace MetroFramework.Drawing.Html
         {
             get
             {
-                if ((_actualBorderTopColor.IsEmpty))
+                if (_actualBorderTopColor.IsEmpty)
                 {
                     _actualBorderTopColor = CssValue.GetActualColor(BorderTopColor);
                 }
@@ -1549,7 +1281,7 @@ namespace MetroFramework.Drawing.Html
         {
             get
             {
-                if ((_actualBorderLeftColor.IsEmpty))
+                if (_actualBorderLeftColor.IsEmpty)
                 {
                     _actualBorderLeftColor = CssValue.GetActualColor(BorderLeftColor);
                 }
@@ -1566,7 +1298,7 @@ namespace MetroFramework.Drawing.Html
         {
             get
             {
-                if ((_actualBorderBottomColor.IsEmpty))
+                if (_actualBorderBottomColor.IsEmpty)
                 {
                     _actualBorderBottomColor = CssValue.GetActualColor(BorderBottomColor);
                 }
@@ -1583,7 +1315,7 @@ namespace MetroFramework.Drawing.Html
         {
             get
             {
-                if ((_actualBorderRightColor.IsEmpty))
+                if (_actualBorderRightColor.IsEmpty)
                 {
                     _actualBorderRightColor = CssValue.GetActualColor(BorderRightColor);
                 }
@@ -1603,14 +1335,14 @@ namespace MetroFramework.Drawing.Html
         /// </summary>
         public float ActualCornerNW
         {
-            get 
+            get
             {
                 if (float.IsNaN(_actualCornerNW))
                 {
                     _actualCornerNW = CssValue.ParseLength(CornerNWRadius, 0, this);
                 }
 
-                return _actualCornerNW; 
+                return _actualCornerNW;
             }
         }
 
@@ -1672,13 +1404,11 @@ namespace MetroFramework.Drawing.Html
         /// </summary>
         public float ActualWordSpacing
         {
-            get 
+            get
             {
-                if (float.IsNaN(_actualWordSpacing))
-                {
-                    throw new Exception("Space must be calculated before using this property");
-                }
-                return _actualWordSpacing; 
+                return float.IsNaN(_actualWordSpacing)
+                    ? throw new Exception("Space must be calculated before using this property")
+                    : _actualWordSpacing;
             }
         }
 
@@ -1711,14 +1441,14 @@ namespace MetroFramework.Drawing.Html
         /// </summary>
         public Color ActualBackgroundColor
         {
-            get 
+            get
             {
                 if (_actualBackgroundColor.IsEmpty)
                 {
                     _actualBackgroundColor = CssValue.GetActualColor(BackgroundColor);
                 }
 
-                return _actualBackgroundColor; 
+                return _actualBackgroundColor;
             }
         }
 
@@ -1727,13 +1457,13 @@ namespace MetroFramework.Drawing.Html
         /// </summary>
         public Color ActualBackgroundGradient
         {
-            get 
+            get
             {
                 if (_actualBackgroundGradient.IsEmpty)
                 {
                     _actualBackgroundGradient = CssValue.GetActualColor(BackgroundGradient);
                 }
-                return _actualBackgroundGradient; 
+                return _actualBackgroundGradient;
             }
         }
 
@@ -1743,7 +1473,7 @@ namespace MetroFramework.Drawing.Html
         /// </summary>
         public float ActualBackgroundGradientAngle
         {
-            get 
+            get
             {
                 if (float.IsNaN(_actualBackgroundGradientAngle))
                 {
@@ -1763,14 +1493,9 @@ namespace MetroFramework.Drawing.Html
         /// </summary>
         public Font ActualParentFont
         {
-            get 
+            get
             {
-                if (ParentBox == null)
-                {
-                    return ActualFont;
-                }
-
-                return ParentBox.ActualFont;
+                return ParentBox == null ? ActualFont : ParentBox.ActualFont;
             }
         }
 
@@ -1779,7 +1504,8 @@ namespace MetroFramework.Drawing.Html
         /// </summary>
         public Font ActualFont
         {
-            get {
+            get
+            {
                 if (_actualFont == null)
                 {
                     if (string.IsNullOrEmpty(FontFamily)) { FontFamily = CssDefaults.FontSerif; }
@@ -1787,7 +1513,7 @@ namespace MetroFramework.Drawing.Html
 
                     FontStyle st = System.Drawing.FontStyle.Regular;
 
-                    if (FontStyle == CssConstants.Italic || FontStyle == CssConstants.Oblique)
+                    if (FontStyle is CssConstants.Italic or CssConstants.Oblique)
                     {
                         st |= System.Drawing.FontStyle.Italic;
                     }
@@ -1797,41 +1523,27 @@ namespace MetroFramework.Drawing.Html
                         st |= System.Drawing.FontStyle.Bold;
                     }
 
-                    float fsize = 0f;
                     float parentSize = CssDefaults.FontSize;
 
-                    if(ParentBox != null) parentSize = ParentBox.ActualFont.Size;
-
-                    switch (FontSize)
+                    if (ParentBox != null) parentSize = ParentBox.ActualFont.Size;
+                    var fsize = FontSize switch
                     {
-                        case CssConstants.Medium:
-                            fsize = CssDefaults.FontSize; break;
-                        case CssConstants.XXSmall:
-                            fsize = CssDefaults.FontSize - 4; break;
-                        case CssConstants.XSmall:
-                            fsize = CssDefaults.FontSize - 3; break;
-                        case CssConstants.Small:
-                            fsize = CssDefaults.FontSize - 2; break;
-                        case CssConstants.Large:
-                            fsize = CssDefaults.FontSize + 2; break;
-                        case CssConstants.XLarge:
-                            fsize = CssDefaults.FontSize + 3; break;
-                        case CssConstants.XXLarge:
-                            fsize = CssDefaults.FontSize + 4; break;
-                        case CssConstants.Smaller:
-                            fsize = parentSize - 2; break;
-                        case CssConstants.Larger:
-                            fsize = parentSize + 2; break;
-                        default:
-                            fsize = CssValue.ParseLength(FontSize, parentSize, this, parentSize, true);
-                            break;
-                    }
-
+                        CssConstants.Medium => CssDefaults.FontSize,
+                        CssConstants.XXSmall => CssDefaults.FontSize - 4,
+                        CssConstants.XSmall => CssDefaults.FontSize - 3,
+                        CssConstants.Small => CssDefaults.FontSize - 2,
+                        CssConstants.Large => CssDefaults.FontSize + 2,
+                        CssConstants.XLarge => CssDefaults.FontSize + 3,
+                        CssConstants.XXLarge => CssDefaults.FontSize + 4,
+                        CssConstants.Smaller => parentSize - 2,
+                        CssConstants.Larger => parentSize + 2,
+                        _ => CssValue.ParseLength(FontSize, parentSize, this, parentSize, true),
+                    };
                     if (fsize <= 1f) fsize = CssDefaults.FontSize;
 
                     _actualFont = new Font(FontFamily, fsize, st);
                 }
-                return _actualFont; 
+                return _actualFont;
             }
         }
 
@@ -1852,7 +1564,7 @@ namespace MetroFramework.Drawing.Html
                     _actualTextIndent = CssValue.ParseLength(TextIndent, Size.Width, this);
                 }
 
-                return _actualTextIndent; 
+                return _actualTextIndent;
             }
         }
 
@@ -1866,7 +1578,7 @@ namespace MetroFramework.Drawing.Html
         /// </summary>
         public float ActualBorderSpacingHorizontal
         {
-            get 
+            get
             {
                 if (float.IsNaN(_actualBorderSpacingHorizontal))
                 {
@@ -1879,11 +1591,11 @@ namespace MetroFramework.Drawing.Html
                     else if (matches.Count > 0)
                     {
                         _actualBorderSpacingHorizontal = CssValue.ParseLength(matches[0].Value, 1, this);
-                    } 
+                    }
                 }
-                
 
-                return _actualBorderSpacingHorizontal; 
+
+                return _actualBorderSpacingHorizontal;
             }
         }
 
@@ -1898,20 +1610,11 @@ namespace MetroFramework.Drawing.Html
                 {
                     MatchCollection matches = Parser.Match(Parser.CssLength, BorderSpacing);
 
-                    if (matches.Count == 0)
-                    {
-                        _actualBorderSpacingVertical = 0;
-                    }
-                    else if (matches.Count == 1)
-                    {
-                        _actualBorderSpacingVertical = CssValue.ParseLength(matches[0].Value, 1, this);
-                    }
-                    else
-                    {
-                        _actualBorderSpacingVertical = CssValue.ParseLength(matches[1].Value, 1, this);
-                    } 
+                    _actualBorderSpacingVertical = matches.Count == 0
+                        ? 0
+                        : matches.Count == 1 ? CssValue.ParseLength(matches[0].Value, 1, this) : CssValue.ParseLength(matches[1].Value, 1, this);
                 }
-                return _actualBorderSpacingVertical; 
+                return _actualBorderSpacingVertical;
             }
         }
 
@@ -1925,13 +1628,7 @@ namespace MetroFramework.Drawing.Html
         /// <summary>
         /// Gets the ï¿?box
         /// </summary>
-        public CssBox ListItemBox
-        {
-            get 
-            {
-                return _listItemBox; 
-            }
-        }
+        public CssBox ListItemBox { get; private set; }
 
         /// <summary>
         /// Gets the width available on the box, counting padding and margin.
@@ -1955,11 +1652,11 @@ namespace MetroFramework.Drawing.Html
         /// </summary>
         public float ActualBottom
         {
-            get 
+            get
             {
                 return Location.Y + Size.Height;
             }
-            set 
+            set
             {
                 Size = new SizeF(Size.Width, value - Location.Y);
             }
@@ -1968,10 +1665,7 @@ namespace MetroFramework.Drawing.Html
         /// <summary>
         /// Gets the childrenn boxes of this box
         /// </summary>
-        public List<CssBox> Boxes
-        {
-            get { return _boxes; }
-        }
+        public List<CssBox> Boxes { get; }
 
         /// <summary>
         /// Gets the left of the client rectangle (Where content starts rendering)
@@ -2028,7 +1722,7 @@ namespace MetroFramework.Drawing.Html
                 CssBox b = ParentBox;
 
                 while (
-                    b.Display != CssConstants.Block && 
+                    b.Display != CssConstants.Block &&
                     b.Display != CssConstants.Table &&
                     b.Display != CssConstants.TableCell &&
                     b.ParentBox != null)
@@ -2037,9 +1731,7 @@ namespace MetroFramework.Drawing.Html
                 }
 
                 //Comment this following line to treat always superior box as block
-                if (b == null) throw new Exception("There's no containing block on the chain");
-
-                return b;
+                return b ?? throw new Exception("There's no containing block on the chain");
             }
         }
 
@@ -2063,7 +1755,7 @@ namespace MetroFramework.Drawing.Html
         /// </summary>
         public float FontLineSpacing
         {
-            get 
+            get
             {
                 if (float.IsNaN(_fontLineSpacing))
                 {
@@ -2084,7 +1776,8 @@ namespace MetroFramework.Drawing.Html
                 if (float.IsNaN(_fontDescent))
                 {
                     _fontDescent = CssLayoutEngine.GetDescent(ActualFont);
-                } return _fontDescent;
+                }
+                return _fontDescent;
             }
         }
 
@@ -2099,28 +1792,17 @@ namespace MetroFramework.Drawing.Html
         /// <summary>
         /// Gets or sets the first linebox where content of this box appear
         /// </summary>
-        internal CssLineBox FirstHostingLineBox
-        {
-            get { return _firstHostingLineBox; }
-            set { _firstHostingLineBox = value; }
-        }
+        internal CssLineBox FirstHostingLineBox { get; set; }
 
         /// <summary>
         /// Gets or sets the last linebox where content of this box appear
         /// </summary>
-        internal CssLineBox LastHostingLineBox
-        {
-            get { return _lastHostingLineBox; }
-            set { _lastHostingLineBox = value; }
-        }
+        internal CssLineBox LastHostingLineBox { get; set; }
 
         /// <summary>
         /// Gets the HTMLTag that hosts this box
         /// </summary>
-        public HtmlTag HtmlTag
-        {
-            get { return _htmltag; }
-        }
+        public HtmlTag HtmlTag { get; }
 
         /// <summary>
         /// Gets the InitialContainer of the Box.
@@ -2136,7 +1818,7 @@ namespace MetroFramework.Drawing.Html
         /// </summary>
         public bool IsImage
         {
-            get { return Words.Count == 1 && Words[0].IsImage; } 
+            get { return Words.Count == 1 && Words[0].IsImage; }
         }
 
         /// <summary>
@@ -2152,12 +1834,13 @@ namespace MetroFramework.Drawing.Html
         /// </summary>
         public bool IsSpaceOrEmpty
         {
-            get {
+            get
+            {
 
 
                 if ((Words.Count == 0 && Boxes.Count == 0) ||
                 (Words.Count == 1 && Words[0].IsSpaces) ||
-                Boxes.Count == 1 && Boxes[0] is CssAnonymousSpaceBlockBox) return true;
+                (Boxes.Count == 1 && Boxes[0] is CssAnonymousSpaceBlockBox)) return true;
 
                 foreach (CssBoxWord word in Words)
                 {
@@ -2176,16 +1859,13 @@ namespace MetroFramework.Drawing.Html
         /// </summary>
         internal CssBoxWord LastWord
         {
-            get { return Words[Words.Count - 1]; }
+            get { return Words[^1]; }
         }
 
         /// <summary>
         /// Gets the line-boxes of this box (if block box)
         /// </summary>
-        internal List<CssLineBox> LineBoxes
-        {
-            get { return _lineBoxes; }
-        }
+        internal List<CssLineBox> LineBoxes { get; }
 
         /// <summary>
         /// Gets or sets the location of the box
@@ -2202,8 +1882,8 @@ namespace MetroFramework.Drawing.Html
         public CssBox ParentBox
         {
             get { return _parentBox; }
-            set 
-            { 
+            set
+            {
                 //Remove from last parent
                 if (_parentBox != null && _parentBox.Boxes.Contains(this))
                 {
@@ -2224,23 +1904,12 @@ namespace MetroFramework.Drawing.Html
         /// <summary>
         /// Gets the linebox(es) that contains words of this box (if inline)
         /// </summary>
-        internal List<CssLineBox> ParentLineBoxes
-        {
-            get { return _parentLineBoxes; }
-        }
+        internal List<CssLineBox> ParentLineBoxes { get; }
 
         /// <summary>
         /// Gets the rectangles where this box should be painted
         /// </summary>
-        internal Dictionary<CssLineBox, RectangleF> Rectangles
-        {
-            get
-            {
-                
-
-                return _rectangles;
-            }
-        }
+        internal Dictionary<CssLineBox, RectangleF> Rectangles { get; } = null;
 
         /// <summary>
         /// Gets the right of the box. When setting, it will affect only the width of the box.
@@ -2275,10 +1944,7 @@ namespace MetroFramework.Drawing.Html
         /// <summary>
         /// Gets the BoxWords of text in the box
         /// </summary>
-        internal List<CssBoxWord> Words
-        {
-            get { return _boxWords; }
-        }
+        internal List<CssBoxWord> Words { get; }
 
         #endregion
 
@@ -2336,27 +2002,20 @@ namespace MetroFramework.Drawing.Html
         {
             if (Display == CssConstants.ListItem)
             {
-                if (_listItemBox == null)
+                if (ListItemBox == null)
                 {
-                    _listItemBox = new CssBox();
-                    _listItemBox.InheritStyle(this, false);
-                    _listItemBox.Display = CssConstants.Inline;
-                    _listItemBox.SetInitialContainer(InitialContainer);
+                    ListItemBox = new CssBox();
+                    ListItemBox.InheritStyle(this, false);
+                    ListItemBox.Display = CssConstants.Inline;
+                    ListItemBox.SetInitialContainer(InitialContainer);
 
-                    if (ParentBox != null && ListStyleType == CssConstants.Decimal)
-                    {
-                        _listItemBox.Text = GetIndexForList().ToString() + ".";
-                    }
-                    else
-                    {
-                        _listItemBox.Text = "";
-                    }
-                    
-                    _listItemBox.MeasureBounds(g);
-                    _listItemBox.Size = new SizeF(_listItemBox.Words[0].Width, _listItemBox.Words[0].Height); 
+                    ListItemBox.Text = ParentBox != null && ListStyleType == CssConstants.Decimal ? GetIndexForList().ToString() + "." : "";
+
+                    ListItemBox.MeasureBounds(g);
+                    ListItemBox.Size = new SizeF(ListItemBox.Words[0].Width, ListItemBox.Words[0].Height);
                 }
-                _listItemBox.Words[0].Left = Location.X - _listItemBox.Size.Width - 5;
-                _listItemBox.Words[0].Top = Location.Y + ActualPaddingTop;// +FontAscent;
+                ListItemBox.Words[0].Left = Location.X - ListItemBox.Size.Width - 5;
+                ListItemBox.Words[0].Top = Location.Y + ActualPaddingTop;// +FontAscent;
             }
         }
 
@@ -2373,7 +2032,7 @@ namespace MetroFramework.Drawing.Html
             }
 
             if (b.Words.Count > 0)
-            {   
+            {
                 foreach (CssBoxWord word in b.Words)
                 {
                     if (line.Words.Contains(word))
@@ -2417,17 +2076,7 @@ namespace MetroFramework.Drawing.Html
         /// <returns>Attribute value or defaultValue if no attribute specified</returns>
         internal string GetAttribute(string attribute, string defaultValue)
         {
-            if (HtmlTag == null)
-            {
-                return defaultValue;
-            }
-
-            if (!HtmlTag.HasAttribute(attribute))
-            {
-                return defaultValue;
-            }
-
-            return HtmlTag.Attributes[attribute];
+            return HtmlTag == null ? defaultValue : !HtmlTag.HasAttribute(attribute) ? defaultValue : HtmlTag.Attributes[attribute];
         }
 
         /// <summary>
@@ -2504,7 +2153,7 @@ namespace MetroFramework.Drawing.Html
             //float padding = box.ActualMarginLeft + box.ActualBorderLeftWidth + box.ActualPaddingLeft +
             //    box.ActualMarginRight + box.ActualBorderRightWidth + box.ActualPaddingRight;
 
-            float padding =  box.ActualBorderLeftWidth + box.ActualPaddingLeft +
+            float padding = box.ActualBorderLeftWidth + box.ActualPaddingLeft +
                  box.ActualBorderRightWidth + box.ActualPaddingRight;
 
             sum += padding;
@@ -2536,8 +2185,8 @@ namespace MetroFramework.Drawing.Html
             }
             else
             {
-                foreach(CssBox bb in b.Boxes)
-                    GetMinimumWidth_LongestWord(bb, ref maxw,ref word);
+                foreach (CssBox bb in b.Boxes)
+                    GetMinimumWidth_LongestWord(bb, ref maxw, ref word);
             }
 
         }
@@ -2632,12 +2281,7 @@ namespace MetroFramework.Drawing.Html
         /// <returns></returns>
         internal bool HasJustInlineSiblings()
         {
-            if (ParentBox == null)
-            {
-                return false;
-            }
-
-            return ParentBox.ContainsInlinesOnly();
+            return ParentBox != null && ParentBox.ContainsInlinesOnly();
         }
 
         /// <summary>
@@ -2649,7 +2293,7 @@ namespace MetroFramework.Drawing.Html
         /// Delivers a rectangle for each LineBox related to this box, if inline.
         /// </remarks>
 
-         /// <summary>
+        /// <summary>
         /// Inherits inheritable values from parent.
         /// </summary>
         internal void InheritStyle()
@@ -2684,7 +2328,6 @@ namespace MetroFramework.Drawing.Html
         /// <returns>Maximum of margins</returns>
         private float MarginCollapse(CssBox a, CssBox b)
         {
-            
             return Math.Max(
                 a == null ? 0 : a.ActualMarginBottom,
                 b == null ? 0 : b.ActualMarginTop);
@@ -2703,12 +2346,12 @@ namespace MetroFramework.Drawing.Html
 
             MeasureWordsSize(g);
 
-            if (Display == CssConstants.Block || 
-                Display == CssConstants.ListItem || 
-                Display == CssConstants.Table || 
-                Display == CssConstants.InlineTable ||
-                Display == CssConstants.TableCell ||
-                Display == CssConstants.None)
+            if (Display is CssConstants.Block or
+                CssConstants.ListItem or
+                CssConstants.Table or
+                CssConstants.InlineTable or
+                CssConstants.TableCell or
+                CssConstants.None)
             {
                 #region Measure Bounds
                 if (Display != CssConstants.TableCell)
@@ -2723,8 +2366,8 @@ namespace MetroFramework.Drawing.Html
                     ActualBottom = top;
                 }
 
-                if (Display != CssConstants.TableCell &&
-                    Display != CssConstants.Table) //Because their width and height are set by CssTable
+                if (Display is not CssConstants.TableCell and
+                    not CssConstants.Table) //Because their width and height are set by CssTable
                 {
                     #region Set Width
                     //width at 100% (or auto)
@@ -2749,9 +2392,9 @@ namespace MetroFramework.Drawing.Html
                 }
 
                 //If we're talking about a table here..
-                if (Display == CssConstants.Table || Display == CssConstants.InlineTable)
+                if (Display is CssConstants.Table or CssConstants.InlineTable)
                 {
-                    CssTable tbl = new CssTable(this, g);
+                    CssTable tbl = new(this, g);
                 }
                 else if (Display != CssConstants.None)
                 {
@@ -2777,7 +2420,7 @@ namespace MetroFramework.Drawing.Html
                         if (lastOne != null)
                             ActualBottom = Math.Max(ActualBottom, lastOne.ActualBottom + lastOne.ActualMarginBottom + ActualPaddingBottom);
                     }
-                } 
+                }
                 #endregion
             }
 
@@ -2821,7 +2464,7 @@ namespace MetroFramework.Drawing.Html
             {
                 #region Measure image
 
-                CssBoxWord word = new CssBoxWord(this, CssValue.GetImage(GetAttribute("src")));
+                CssBoxWord word = new(this, CssValue.GetImage(GetAttribute("src")));
                 Words.Clear();
                 Words.Add(word);
 
@@ -2865,7 +2508,7 @@ namespace MetroFramework.Drawing.Html
                         string word = b.Text;
 
                         CharacterRange[] measurable = { new CharacterRange(0, word.Length) };
-                        StringFormat sf = new StringFormat();
+                        StringFormat sf = new();
 
                         sf.SetMeasurableCharacterRanges(measurable);
 
@@ -2895,7 +2538,7 @@ namespace MetroFramework.Drawing.Html
         /// <param name="length"></param>
         private string NoEms(string length)
         {
-            CssLength len = new CssLength(length);
+            CssLength len = new(length);
 
             if (len.Unit == CssLength.CssUnit.Ems)
             {
@@ -2911,7 +2554,7 @@ namespace MetroFramework.Drawing.Html
         /// <param name="amount"></param>
         internal void OffsetTop(float amount)
         {
-            List<CssLineBox> lines = new List<CssLineBox>();
+            List<CssLineBox> lines = new();
             foreach (CssLineBox line in Rectangles.Keys)
                 lines.Add(line);
 
@@ -2925,7 +2568,7 @@ namespace MetroFramework.Drawing.Html
             {
                 word.Top += amount;
             }
-            
+
             foreach (CssBox b in Boxes)
             {
                 b.OffsetTop(amount);
@@ -2940,10 +2583,10 @@ namespace MetroFramework.Drawing.Html
         /// <param name="g"></param>
         public void Paint(Graphics g)
         {
-            if (Display == CssConstants.None) 
+            if (Display == CssConstants.None)
                 return;
 
-            if (Display == CssConstants.TableCell && 
+            if (Display == CssConstants.TableCell &&
                 EmptyCells == CssConstants.Hide &&
                 IsSpaceOrEmpty)
                 return;
@@ -2962,7 +2605,7 @@ namespace MetroFramework.Drawing.Html
                 if (InitialContainer != null && HtmlTag != null && HtmlTag.TagName.Equals("a", StringComparison.CurrentCultureIgnoreCase))
                 {
                     if (InitialContainer.LinkRegions.ContainsKey(this)) InitialContainer.LinkRegions.Remove(this);
-                    
+
                     InitialContainer.LinkRegions.Add(this, actualRect);
                 }
 
@@ -2981,12 +2624,10 @@ namespace MetroFramework.Drawing.Html
             else
             {
                 Font f = ActualFont;
-                using (SolidBrush b = new SolidBrush(CssValue.GetActualColor(Color)))
+                using SolidBrush b = new(CssValue.GetActualColor(Color));
+                foreach (CssBoxWord word in Words)
                 {
-                    foreach (CssBoxWord word in Words)
-                    {
-                        g.DrawString(word.Text, f, b, word.Left - word.LastMeasureOffset.X + offset.X, word.Top + offset.Y);
-                    }
+                    g.DrawString(word.Text, f, b, word.Left - word.LastMeasureOffset.X + offset.X, word.Top + offset.Y);
                 }
 
             }
@@ -2996,7 +2637,7 @@ namespace MetroFramework.Drawing.Html
 
                 PaintDecoration(g, actualRect, i == 0, i == rects.Length - 1);
             }
-            
+
             foreach (CssBox b in Boxes)
             {
                 b.Paint(g);
@@ -3027,11 +2668,9 @@ namespace MetroFramework.Drawing.Html
             //Top border
             if (!(string.IsNullOrEmpty(BorderTopStyle) || BorderTopStyle == CssConstants.None))
             {
-                using (SolidBrush b = new SolidBrush(ActualBorderTopColor))
-                {
-                    if (BorderTopStyle == CssConstants.Inset) b.Color = CssDrawingHelper.Darken(ActualBorderTopColor);
-                    g.FillPath(b, CssDrawingHelper.GetBorderPath(CssDrawingHelper.Border.Top, this, rectangle, isFirst, isLast));
-                }
+                using SolidBrush b = new(ActualBorderTopColor);
+                if (BorderTopStyle == CssConstants.Inset) b.Color = CssDrawingHelper.Darken(ActualBorderTopColor);
+                g.FillPath(b, CssDrawingHelper.GetBorderPath(CssDrawingHelper.Border.Top, this, rectangle, isFirst, isLast));
             }
 
 
@@ -3040,22 +2679,18 @@ namespace MetroFramework.Drawing.Html
                 //Right Border
                 if (!(string.IsNullOrEmpty(BorderRightStyle) || BorderRightStyle == CssConstants.None))
                 {
-                    using (SolidBrush b = new SolidBrush(ActualBorderRightColor))
-                    {
-                        if (BorderRightStyle == CssConstants.Outset) b.Color = CssDrawingHelper.Darken(ActualBorderRightColor);
-                        g.FillPath(b, CssDrawingHelper.GetBorderPath(CssDrawingHelper.Border.Right, this, rectangle, isFirst, isLast));
-                    }
+                    using SolidBrush b = new(ActualBorderRightColor);
+                    if (BorderRightStyle == CssConstants.Outset) b.Color = CssDrawingHelper.Darken(ActualBorderRightColor);
+                    g.FillPath(b, CssDrawingHelper.GetBorderPath(CssDrawingHelper.Border.Right, this, rectangle, isFirst, isLast));
                 }
             }
 
             //Bottom border
             if (!(string.IsNullOrEmpty(BorderBottomStyle) || BorderBottomStyle == CssConstants.None))
             {
-                using (SolidBrush b = new SolidBrush(ActualBorderBottomColor))
-                {
-                    if (BorderBottomStyle == CssConstants.Outset) b.Color = CssDrawingHelper.Darken(ActualBorderBottomColor);
-                    g.FillPath(b, CssDrawingHelper.GetBorderPath(CssDrawingHelper.Border.Bottom, this, rectangle, isFirst, isLast));
-                }
+                using SolidBrush b = new(ActualBorderBottomColor);
+                if (BorderBottomStyle == CssConstants.Outset) b.Color = CssDrawingHelper.Darken(ActualBorderBottomColor);
+                g.FillPath(b, CssDrawingHelper.GetBorderPath(CssDrawingHelper.Border.Bottom, this, rectangle, isFirst, isLast));
             }
 
             if (isFirst)
@@ -3063,11 +2698,9 @@ namespace MetroFramework.Drawing.Html
                 //Left Border
                 if (!(string.IsNullOrEmpty(BorderLeftStyle) || BorderLeftStyle == CssConstants.None))
                 {
-                    using (SolidBrush b = new SolidBrush(ActualBorderLeftColor))
-                    {
-                        if (BorderLeftStyle == CssConstants.Inset) b.Color = CssDrawingHelper.Darken(ActualBorderLeftColor);
-                        g.FillPath(b, CssDrawingHelper.GetBorderPath(CssDrawingHelper.Border.Left, this, rectangle, isFirst, isLast));
-                    }
+                    using SolidBrush b = new(ActualBorderLeftColor);
+                    if (BorderLeftStyle == CssConstants.Inset) b.Color = CssDrawingHelper.Darken(ActualBorderLeftColor);
+                    g.FillPath(b, CssDrawingHelper.GetBorderPath(CssDrawingHelper.Border.Left, this, rectangle, isFirst, isLast));
                 }
             }
 
@@ -3085,22 +2718,16 @@ namespace MetroFramework.Drawing.Html
             if (ContainingBlock.TextAlign == CssConstants.Justify) return;
 
             GraphicsPath roundrect = null;
-            Brush b = null;
             SmoothingMode smooth = g.SmoothingMode;
 
             if (IsRounded)
             {
                 roundrect = CssDrawingHelper.GetRoundRect(rectangle, ActualCornerNW, ActualCornerNE, ActualCornerSE, ActualCornerSW);
             }
-            
-            if (BackgroundGradient != CssConstants.None && rectangle.Width > 0 && rectangle.Height > 0)
-            {
-                b = new LinearGradientBrush(rectangle, ActualBackgroundColor, ActualBackgroundGradient, ActualBackgroundGradientAngle);
-            }
-            else
-            {
-                b = new SolidBrush(ActualBackgroundColor);
-            }
+
+            Brush b = BackgroundGradient != CssConstants.None && rectangle.Width > 0 && rectangle.Height > 0
+    ? new LinearGradientBrush(rectangle, ActualBackgroundColor, ActualBackgroundGradient, ActualBackgroundGradientAngle)
+    : new SolidBrush(ActualBackgroundColor);
 
             if (InitialContainer != null && !InitialContainer.AvoidGeometryAntialias && IsRounded)
             {
@@ -3140,7 +2767,7 @@ namespace MetroFramework.Drawing.Html
             }
             else if (TextDecoration == CssConstants.LineThrough)
             {
-                y = rectangle.Bottom - desc - asc / 2;
+                y = rectangle.Bottom - desc - (asc / 2);
             }
             else if (TextDecoration == CssConstants.Overline)
             {
@@ -3183,7 +2810,7 @@ namespace MetroFramework.Drawing.Html
         /// </summary>
         internal void RectanglesReset()
         {
-            _rectangles.Clear();
+            Rectangles.Clear();
         }
 
         /// <summary>
@@ -3193,7 +2820,7 @@ namespace MetroFramework.Drawing.Html
         {
             for (int i = 0; i < Boxes.Count; i++)
             {
-                if (Boxes[i] is CssAnonymousSpaceBlockBox || Boxes[i] is CssAnonymousSpaceBox)
+                if (Boxes[i] is CssAnonymousSpaceBlockBox or CssAnonymousSpaceBox)
                 {
                     Boxes.RemoveAt(i);
                     i--;
@@ -3232,22 +2859,11 @@ namespace MetroFramework.Drawing.Html
                 t = string.Format("<{0}>", HtmlTag.TagName);
             }
 
-            if (ParentBox == null)
-            {
-                return "Initial Container";
-            }
-            else if (Display == CssConstants.Block)
-            {
-                return string.Format("{0} BlockBox {2}, Children:{1}",t,  Boxes.Count, FontSize);
-            }
-            else if (Display == CssConstants.None)
-            {
-                return string.Format("{0} None", t);
-            }
-            else
-            {
-                return string.Format("{0} {2}: {1}", t, Text, Display);
-            }
+            return ParentBox == null
+                ? "Initial Container"
+                : Display == CssConstants.Block
+                    ? string.Format("{0} BlockBox {2}, Children:{1}", t, Boxes.Count, FontSize)
+                    : Display == CssConstants.None ? string.Format("{0} None", t) : string.Format("{0} {2}: {1}", t, Text, Display);
 
 
             //return base.ToString();
@@ -3261,13 +2877,13 @@ namespace MetroFramework.Drawing.Html
 
             Words.Clear();
 
-            CssBoxWordSplitter splitter = new CssBoxWordSplitter(this, Text);
+            CssBoxWordSplitter splitter = new(this, Text);
             splitter.SplitWords();
 
             Words.AddRange(splitter.Words);
         }
 
-        
+
         #endregion
 
     }
