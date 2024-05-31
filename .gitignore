@@ -2,14 +2,14 @@
 ## Eclipse
 #################
 
-Release*/
+#Release*/
 *.7z
 *.zip
 
 *.pydevproject
 .project
 .metadata
-bin/
+#bin/
 tmp/
 *.tmp
 *.bak
@@ -47,7 +47,7 @@ local.properties
 
 # Build results
 [Dd]ebug/
-[Rr]elease/
+#[Rr]elease/
 *_i.c
 *_p.c
 *.ilk
@@ -101,7 +101,7 @@ DocProject/Help/html
 publish
 
 # Others
-[Bb]in
+#[Bb]in
 [Oo]bj
 sql
 TestResults
@@ -141,10 +141,10 @@ Desktop.ini
 *.egg
 *.egg-info
 dist
-build
+#build
 eggs
 parts
-bin
+#bin
 var
 sdist
 develop-eggs
